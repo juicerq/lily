@@ -22,6 +22,10 @@ export function formatDuration(totalSeconds: number) {
 }
 
 export function formatMinutes(minutes: number) {
+  if (minutes === 0) {
+    return "0m";
+  }
+
   return formatDuration(minutes * 60);
 }
 

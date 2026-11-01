@@ -24,6 +24,7 @@
   const status = $derived(site ? statusOf(snapshot, site, now) : null);
   const used = $derived(site ? usedSeconds({ usage: snapshot.usage, session: snapshot.session, domain: site.domain, now }) : 0);
   const escapable = $derived(status ? canEscape(snapshot, status) : false);
+  const escapesLeft = $derived(MAX_ESCAPES - snapshot.usage.escapes);
 
   $effect(() => {
     const timer = setInterval(() => {
@@ -165,7 +166,7 @@
         {:else if escapable}
           <button class="secondary" onclick={() => (waiting = WAIT_SECONDS)}>
             Liberar 5 min
-            <small>{MAX_ESCAPES - snapshot.usage.escapes} restantes hoje</small>
+            <small>{escapesLeft} {escapesLeft === 1 ? "restante" : "restantes"} hoje</small>
           </button>
         {/if}
       </div>
