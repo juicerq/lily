@@ -1,16 +1,8 @@
 {
   "name": "lily",
   "version": "0.1.1",
-  "devDependencies": {
-    "@wxt-dev/module-svelte": "^2.0.5",
-    "oxlint": "^1.90.0",
-    "svelte": "^5.57.3",
-    "svelte-check": "^4.7.7",
-    "typescript": "5.9.3",
-    "valibot": "^1.5.0",
-    "wxt": "^0.21.5"
-  },
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "wxt -b firefox --mv3",
     "build": "wxt build -b firefox --mv3",
@@ -18,7 +10,19 @@
     "check": "wxt prepare && svelte-check --tsconfig ./tsconfig.json",
     "lint": "oxlint src",
     "postinstall": "wxt prepare",
-    "xpi": "wxt zip -b firefox --mv3 && cp .output/lily-$npm_package_version-firefox.zip .output/lily.xpi"
+    "xpi": "wxt zip -b firefox --mv3 && cp .output/lily-$npm_package_version-firefox.zip .output/lily.xpi",
+    "release": "bun scripts/release.ts"
   },
-  "type": "module"
+  "dependencies": {
+    "valibot": "^1.5.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "@wxt-dev/module-svelte": "^2.0.5",
+    "oxlint": "^1.90.0",
+    "svelte": "^5.57.3",
+    "svelte-check": "^4.7.7",
+    "typescript": "5.9.3",
+    "wxt": "^0.21.5"
+  }
 }

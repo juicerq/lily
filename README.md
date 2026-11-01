@@ -28,7 +28,18 @@ O Zen aceita extensões sem assinatura da Mozilla.
 
 3. Em `about:addons`, clique na engrenagem, depois em "Instalar extensão de um arquivo", e escolha `.output/lily.xpi`.
 
-Para atualizar, gere o pacote de novo e instale por cima. A configuração e o uso do dia continuam, porque o ID da extensão é o mesmo.
+Depois da primeira instalação, a extensão se atualiza sozinha. Ela consulta o [`updates.json`](updates.json) deste repositório e baixa o `.xpi` do release mais novo.
+
+Para checar mais vezes que 1× por dia, mude `extensions.update.interval` em `about:config` para `3600` (segundos). Para forçar na hora: `about:addons` → engrenagem → "Procurar atualizações".
+
+## Publicar uma versão
+
+```sh
+bun run release          # 0.1.2 → 0.1.3
+bun run release minor    # 0.1.2 → 0.2.0
+```
+
+O script exige o `main` limpo. Ele sobe a versão, roda as checagens, gera o `.xpi`, cria o release no GitHub e atualiza o `updates.json`.
 
 ## Checagens
 
