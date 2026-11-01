@@ -224,13 +224,15 @@
 
   .big {
     display: flex;
-    align-items: baseline;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 8px;
   }
 
   .num {
     font-size: 48px;
     line-height: 1;
+    white-space: nowrap;
   }
 
   .note {
