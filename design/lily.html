@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@500..900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0}
+.stage{display:grid;grid-template-columns:340px 1fr;gap:12px;align-items:stretch}
+.pop,.blk{padding:16px;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+.blk{justify-content:space-between}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+kbd{font:inherit}
+ul{list-style:none;margin:0;padding:0}
+.hd,.ft,.blk-top{display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:7px}
+.mark{display:inline-block;width:10px;height:10px}
+.big{display:flex;align-items:baseline;gap:8px}
+.num,.val,.clock,.remain{font-variant-numeric:tabular-nums}
+.bar{position:relative;overflow:hidden}
+.bar b{display:block;height:100%;width:var(--p)}
+.focus{display:flex;justify-content:space-between;align-items:center;width:100%;transition:transform .16s cubic-bezier(.2,.8,.2,1),background-color .16s,color .16s,box-shadow .16s}
+.sites li{display:grid;grid-template-columns:1fr auto;align-items:baseline;column-gap:12px;row-gap:7px}
+.sites li .bar{grid-column:1/-1}
+.acts{display:flex;gap:8px}
+.acts button{transition:transform .16s cubic-bezier(.2,.8,.2,1),background-color .16s,color .16s,box-shadow .16s}
+.blk-main{padding:24px 0}
+
+/* 6 dot matrix */
+.s6 .pop,.s6 .blk{background:#000;color:#f0f0f0;font-family:'Space Mono',ui-monospace,monospace;border-radius:22px;box-shadow:0 0 0 1px #1d1d1d}
+.s6 .blk{background:radial-gradient(circle,#161616 1px,transparent 1.5px) 0 0/10px 10px,#000}
+.s6 .hd{font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:0 2px 14px}
+.s6 .logo{font-family:'Doto',monospace;font-weight:900;font-size:18px;text-transform:lowercase;letter-spacing:0}
+.s6 .lm{width:20px;height:20px;display:block}
+.s6 .date{color:#6a6a6a}
+.s6 .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#6a6a6a}
+.s6 .today{padding:14px 18px 18px;background:#0e0e0e;border-radius:16px}
+.s6 .num{font-family:'Doto',monospace;font-weight:900;font-size:52px;letter-spacing:-.02em;line-height:1}
+.s6 .of{font-size:11px;color:#6a6a6a;text-transform:uppercase}
+.s6 .bar{height:8px;margin-top:12px;background:radial-gradient(circle,#2a2a2a 2px,transparent 2.5px) 0 0/8px 8px}
+.s6 .bar b{background:radial-gradient(circle,#f0f0f0 2px,transparent 2.5px) 0 0/8px 8px}
+.s6 .focus{margin-top:10px;background:#f0f0f0;color:#000;padding:13px 18px;border-radius:99px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.s6 .focus:hover{transform:scale(.985)}
+.s6 .focus kbd{font-weight:400;opacity:.6}
+.s6 .list-lbl{margin:18px 2px 4px}
+.s6 .sites li{padding:10px 2px}
+.s6 .dom{font-size:13px}
+.s6 .val{font-size:11px;color:#6a6a6a;text-transform:uppercase}
+.s6 .warn .val{color:#f0f0f0}
+.s6 .warn .bar b{animation:pulse 1.4s ease-in-out infinite}
+.s6 .blocked .dom,.s6 .blocked .val{color:#6a6a6a}
+.s6 .blocked .bar b{background:radial-gradient(circle,#6a6a6a 2px,transparent 2.5px) 0 0/8px 8px}
+.s6 .ft{font-size:10px;color:#6a6a6a;text-transform:uppercase;letter-spacing:.08em;padding:12px 2px 0;margin-top:auto}
+.s6 .blk-top{font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.s6 .blk-top .dom{color:#6a6a6a}
+.s6 .blk-main{padding:28px 2px}
+.s6 .clock{font-family:'Doto',monospace;font-weight:900;font-size:100px;line-height:.9;margin:10px 0}
+.s6 .remain{font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.s6 .why{font-size:11px;color:#6a6a6a;margin:0 2px 14px;text-transform:uppercase;letter-spacing:.04em}
+.s6 .acts button{padding:12px 18px;border-radius:99px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.s6 .pri{background:#f0f0f0;color:#000}
+.s6 .sec{box-shadow:inset 0 0 0 1px #333}
+.s6 .acts button:hover{transform:scale(.97)}
+
+.s6 .logo{gap:8px}
+.icons{display:flex;align-items:flex-end;gap:16px;margin:0 0 16px}
+.ic{box-shadow:0 0 0 1px #1d1d1d;border-radius:22%}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs><symbol id="lily" viewBox="0 0 64 64"><g transform="translate(32 32)"><g transform="rotate(0)"><path d="M0 0C-10.0 -2.9 -10.5 -17.4 0 -29.0Z" fill="#f0f0f0"/><path d="M0 0C10.0 -2.9 10.5 -17.4 0 -29.0Z" fill="#b4b4b4"/></g><g transform="rotate(45)"><path d="M0 0C-10.0 -2.9 -10.5 -17.4 0 -29.0Z" fill="#b4b4b4"/><path d="M0 0C10.0 -2.9 10.5 -17.4 0 -29.0Z" fill="#767676"/></g><g transform="rotate(90)"><path d="M0 0C-10.0 -2.9 -10.5 -17.4 0 -29.0Z" fill="#767676"/><path d="M0 0C10.0 -2.9 10.5 -17.4 0 -29.0Z" fill="#464646"/></g><g transform="rotate(135)"><path d="M0 0C-10.0 -2.9 -10.5 -17.4 0 -29.0Z" fill="#767676"/><path d="M0 0C10.0 -2.9 10.5 -17.4 0 -29.0Z" fill="#464646"/></g><g transform="rotate(180)"><path d="M0 0C-10.0 -2.9 -10.5 -17.4 0 -29.0Z" fill="#767676"/><path d="M0 0C10.0 -2.9 10.5 -17.4 0 -29.0Z" fill="#464646"/></g><g transform="rotate(225)"><path d="M0 0C-10.0 -2.9 -10.5 -17.4 0 -29.0Z" fill="#b4b4b4"/><path d="M0 0C10.0 -2.9 10.5 -17.4 0 -29.0Z" fill="#767676"/></g><g transform="rotate(270)"><path d="M0 0C-10.0 -2.9 -10.5 -17.4 0 -29.0Z" fill="#f0f0f0"/><path d="M0 0C10.0 -2.9 10.5 -17.4 0 -29.0Z" fill="#b4b4b4"/></g><g transform="rotate(315)"><path d="M0 0C-10.0 -2.9 -10.5 -17.4 0 -29.0Z" fill="#f0f0f0"/><path d="M0 0C10.0 -2.9 10.5 -17.4 0 -29.0Z" fill="#b4b4b4"/></g><g transform="rotate(22.5)"><path d="M0 0C-7.0 -1.9 -7.4 -11.4 0 -19.0Z" fill="#f0f0f0"/><path d="M0 0C7.0 -1.9 7.4 -11.4 0 -19.0Z" fill="#b4b4b4"/></g><g transform="rotate(67.5)"><path d="M0 0C-7.0 -1.9 -7.4 -11.4 0 -19.0Z" fill="#b4b4b4"/><path d="M0 0C7.0 -1.9 7.4 -11.4 0 -19.0Z" fill="#767676"/></g><g transform="rotate(112.5)"><path d="M0 0C-7.0 -1.9 -7.4 -11.4 0 -19.0Z" fill="#b4b4b4"/><path d="M0 0C7.0 -1.9 7.4 -11.4 0 -19.0Z" fill="#767676"/></g><g transform="rotate(157.5)"><path d="M0 0C-7.0 -1.9 -7.4 -11.4 0 -19.0Z" fill="#b4b4b4"/><path d="M0 0C7.0 -1.9 7.4 -11.4 0 -19.0Z" fill="#767676"/></g><g transform="rotate(202.5)"><path d="M0 0C-7.0 -1.9 -7.4 -11.4 0 -19.0Z" fill="#b4b4b4"/><path d="M0 0C7.0 -1.9 7.4 -11.4 0 -19.0Z" fill="#767676"/></g><g transform="rotate(247.5)"><path d="M0 0C-7.0 -1.9 -7.4 -11.4 0 -19.0Z" fill="#f0f0f0"/><path d="M0 0C7.0 -1.9 7.4 -11.4 0 -19.0Z" fill="#b4b4b4"/></g><g transform="rotate(292.5)"><path d="M0 0C-7.0 -1.9 -7.4 -11.4 0 -19.0Z" fill="#f0f0f0"/><path d="M0 0C7.0 -1.9 7.4 -11.4 0 -19.0Z" fill="#b4b4b4"/></g><g transform="rotate(337.5)"><path d="M0 0C-7.0 -1.9 -7.4 -11.4 0 -19.0Z" fill="#f0f0f0"/><path d="M0 0C7.0 -1.9 7.4 -11.4 0 -19.0Z" fill="#b4b4b4"/></g><circle r="4.5" fill="#464646"/><circle cx="-1" cy="-1" r="2" fill="#b4b4b4"/></g></symbol><symbol id="lily-app" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#000"/><use href="#lily" x="6.4" y="6.4" width="51.2" height="51.2"/></symbol></defs></svg>
+<main class="s6"><div class="icons"><svg class="ic" width="64" height="64"><use href="#lily-app"/></svg><svg class="ic" width="32" height="32"><use href="#lily-app"/></svg><svg class="ic" width="16" height="16"><use href="#lily-app"/></svg></div><div class="stage">
+<div class="pop">
+  <header class="hd"><span class="logo"><svg class="lm" aria-hidden="true"><use href="#lily"/></svg>lily</span><span class="date">dom, 1 nov</span></header>
+  <section class="today">
+    <div class="lbl">Hoje</div>
+    <div class="big"><span class="num">1h 42m</span><span class="of">de 3h</span></div>
+    <div class="bar"><b style="--p:57%"></b></div>
+  </section>
+  <button class="focus"><span>Iniciar foco</span><kbd>25 min</kbd></button>
+  <div class="lbl list-lbl">Sites</div>
+  <ul class="sites">
+    <li><span class="dom">youtube.com</span><span class="val">48m / 1h</span><div class="bar"><b style="--p:80%"></b></div></li>
+    <li class="warn"><span class="dom">x.com</span><span class="val">3m restantes</span><div class="bar"><b style="--p:90%"></b></div></li>
+    <li class="blocked"><span class="dom">reddit.com</span><span class="val">até 18:00</span><div class="bar"><b style="--p:100%"></b></div></li>
+    <li><span class="dom">instagram.com</span><span class="val">0m / 15m</span><div class="bar"><b style="--p:0%"></b></div></li>
+  </ul>
+  <footer class="ft"><span>Pausar regras</span><kbd>Alt+Shift+L</kbd></footer>
+</div>
+
+<div class="blk">
+  <div class="blk-top"><span class="logo"><svg class="lm" aria-hidden="true"><use href="#lily"/></svg>lily</span><span class="dom">reddit.com</span></div>
+  <div class="blk-main">
+    <div class="lbl">Bloqueado até</div>
+    <div class="clock">18:00</div>
+    <div class="remain">libera em 2h 14m</div>
+  </div>
+  <div>
+    <p class="why">Limite de 30m atingido às 15:46.</p>
+    <div class="acts"><button class="pri">Voltar</button><button class="sec">Liberar 5 min</button></div>
+  </div>
+</div>
+</div></main>
+</body>
+</html>

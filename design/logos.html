@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@500..900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0}
+svg{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{border-radius:22px;background:#000;box-shadow:0 0 0 1px #1d1d1d;padding:16px;color:#f0f0f0;font-family:'Space Mono',ui-monospace,monospace;display:flex;flex-direction:column;gap:14px;--t1:#f0f0f0;--t2:#b4b4b4;--t3:#767676;--t4:#464646}
+.top{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#6a6a6a}
+.top b{color:#f0f0f0;font-weight:700}
+.hero{height:150px;border-radius:16px;background:radial-gradient(circle,#161616 1px,transparent 1.5px) 0 0/10px 10px,#070707;display:grid;place-items:center}
+.hero svg{width:96px;height:96px}
+.sizes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chip{border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:12px;background:#0e0e0e}
+.chip.light{background:#f0f0f0;--t1:#9a9a9a;--t2:#5e5e5e;--t3:#2e2e2e;--t4:#0a0a0a}
+.chip svg:nth-child(1){width:16px;height:16px}
+.chip svg:nth-child(2){width:24px;height:24px}
+.chip svg:nth-child(3){width:32px;height:32px}
+.hd{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;box-shadow:inset 0 0 0 1px #1d1d1d;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.logo{display:flex;align-items:center;gap:8px;font-family:'Doto',monospace;font-weight:900;font-size:18px;letter-spacing:0;text-transform:lowercase}
+.logo svg{width:18px;height:18px}
+.date{color:#6a6a6a}
+.why{font-size:11px;color:#8a8a8a;line-height:1.5;margin:0}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+<defs>
+<symbol id="a" viewBox="0 0 64 64">
+  <path d="M30 54 L12 44 L6 22 Z" fill="var(--t3)"/>
+  <path d="M30 54 L6 22 L24 34 Z" fill="var(--t2)"/>
+  <path d="M34 54 L52 44 L58 22 Z" fill="var(--t4)"/>
+  <path d="M34 54 L58 22 L40 34 Z" fill="var(--t3)"/>
+  <path d="M32 6 L22 30 L32 54 Z" fill="var(--t1)"/>
+  <path d="M32 6 L42 30 L32 54 Z" fill="var(--t2)"/>
+</symbol>
+<symbol id="b" viewBox="0 0 64 64">
+  <path d="M32 4 C20 16 18 36 32 58 Z" fill="var(--t1)"/>
+  <path d="M32 4 C44 16 46 36 32 58 Z" fill="var(--t3)"/>
+  <path d="M32 58 C16 52 8 38 8 24 L32 40 Z" fill="var(--t2)"/>
+  <path d="M32 58 C48 52 56 38 56 24 L32 40 Z" fill="var(--t4)"/>
+</symbol>
+<symbol id="c" viewBox="0 0 64 64">
+  <path d="M32 37 L14 58 L32 58 Z" fill="var(--t2)"/>
+  <path d="M32 37 L50 58 L32 58 Z" fill="var(--t4)"/>
+  <path d="M32 33 L20 29 L8 10 Z" fill="var(--t3)"/>
+  <path d="M32 33 L8 10 L26 19 Z" fill="var(--t2)"/>
+  <path d="M32 33 L44 29 L56 10 Z" fill="var(--t4)"/>
+  <path d="M32 33 L56 10 L38 19 Z" fill="var(--t3)"/>
+  <path d="M32 4 L26 20 L32 33 Z" fill="var(--t1)"/>
+  <path d="M32 4 L38 20 L32 33 Z" fill="var(--t2)"/>
+</symbol>
+<symbol id="d" viewBox="0 0 64 64">
+  <g transform="translate(-3 4)">
+    <path d="M14 10 L26 10 L34 4 L22 4 Z" fill="var(--t2)"/>
+    <path d="M26 10 L34 4 L34 36 L26 42 Z" fill="var(--t3)"/>
+    <path d="M26 42 L48 42 L56 36 L34 36 Z" fill="var(--t2)"/>
+    <path d="M48 42 L56 36 L56 48 L48 54 Z" fill="var(--t4)"/>
+    <path d="M14 10 L26 10 L26 42 L48 42 L48 54 L14 54 Z" fill="var(--t1)"/>
+  </g>
+</symbol>
+</defs>
+</svg>
+<main class="grid" id="root"></main>
+<script>
+const L=[
+['a','A','Pétalas','Três pétalas low-poly, cada uma com face clara e face escura. Lê como lótus mesmo a 16px.'],
+['b','B','Botão','Lótus em botão: pétala central em pé, duas laterais abertas em curva. Mais orgânico, silhueta em V.'],
+['c','C','Ampulheta','Pétalas abertas em cima, pirâmide embaixo. Lótus e tempo no mesmo desenho.'],
+['d','D','Monograma','L extrudado em perspectiva, três tons de face. Mais tipográfico, menos flor.']];
+const use=(id,n)=>Array.from({length:n},()=>`<svg><use href="#${id}"/></svg>`).join('');
+document.getElementById('root').innerHTML=L.map(([id,k,name,why])=>`
+<section class="card">
+  <div class="top"><span><b>${k}</b> · ${name}</span><span>64 × 64</span></div>
+  <div class="hero">${use(id,1)}</div>
+  <div class="sizes"><div class="chip">${use(id,3)}</div><div class="chip light">${use(id,3)}</div></div>
+  <div class="hd"><span class="logo">${use(id,1)}lotus</span><span class="date">dom, 1 nov</span></div>
+  <p class="why">${why}</p>
+</section>`).join('');
+</script>
+</body>
+</html>
