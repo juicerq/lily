@@ -79,6 +79,10 @@ const version = nextVersion(pkg.version, bump);
 const tag = `v${version}`;
 const previousTag = (await $`git describe --tags --abbrev=0`.nothrow().text()).trim();
 
+const range = previousTag ? `${previousTag}..HEAD` : "HEAD";
+const format = "--pretty=format:- %s";
+const notes = (await $`git log ${range} ${format}`.text()).trim() || "- Sem mudanças listadas";
+
 pkg.version = version;
 await Bun.write("package.json", `${JSON.stringify(pkg, null, 2)}\n`);
 
@@ -101,9 +105,6 @@ const entry: UpdateEntry = {
 const updates = [...(await readUpdates()), entry];
 
 await Bun.write("updates.json", `${JSON.stringify({ addons: { [ADDON_ID]: { updates } } }, null, 2)}\n`);
-
-const range = previousTag ? `${previousTag}..HEAD` : "HEAD";
-const notes = (await $`git log ${range} --pretty=format:- %s`.text()).trim() || "- Sem mudanças listadas";
 
 await $`git add package.json updates.json`;
 await $`git commit -q -m ${`Release ${tag}`}`;
