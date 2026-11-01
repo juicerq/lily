@@ -1,0 +1,13 @@
+{
+  "addons": {
+    "lily@juicerq": {
+      "updates": [
+        {
+          "version": "0.1.2",
+          "update_link": "https://github.com/juicerq/lily/releases/download/v0.1.2/lily-0.1.2.xpi",
+          "update_hash": "sha256:ecead14195735aa3b4038c1d55b2ce34234304d0b324b5f99339852591e6069a"
+        }
+      ]
+    }
+  }
+}
