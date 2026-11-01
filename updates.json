@@ -11,6 +11,11 @@
           "version": "0.1.3",
           "update_link": "https://github.com/juicerq/lily/releases/download/v0.1.3/lily-0.1.3.xpi",
           "update_hash": "sha256:5b2288681878cbe301c8ba32a9a664e1afe083f2e12c938108ed364cd7ffa2e1"
+        },
+        {
+          "version": "0.1.4",
+          "update_link": "https://github.com/juicerq/lily/releases/download/v0.1.4/lily-0.1.4.xpi",
+          "update_hash": "sha256:f14cad06f4b28c5d7a1a2a201bd99d72d5c708a91f0a8fb7640e0f5324c94481"
         }
       ]
     }
