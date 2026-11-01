@@ -113,4 +113,8 @@ await $`git push origin ${tag}`;
 await $`gh release create ${tag} ${xpi} --repo ${REPO} --title ${tag} --notes ${notes}`;
 await $`git push origin main`;
 
+if (process.env.WEB_EXT_API_KEY) {
+  await $`bun scripts/amo.ts`;
+}
+
 console.log(`lily ${tag} publicada. O Zen instala na próxima checagem de atualizações.`);

@@ -200,7 +200,7 @@ async function notifyBeforeBlock(alarm: string) {
 
   await browser.notifications.create("lily-warn", {
     type: "basic",
-    iconUrl: browser.runtime.getURL("/icon.svg"),
+    iconUrl: browser.runtime.getURL("/icon-96.png"),
     title: `${site.domain} bloqueia em 1 min`,
     message,
   });

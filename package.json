@@ -11,7 +11,8 @@
     "lint": "oxlint src",
     "postinstall": "wxt prepare",
     "xpi": "wxt zip -b firefox --mv3 && cp .output/lily-$npm_package_version-firefox.zip .output/lily.xpi",
-    "release": "bun scripts/release.ts"
+    "release": "bun scripts/release.ts",
+    "amo": "bun scripts/amo.ts"
   },
   "dependencies": {
     "valibot": "^1.5.0"
@@ -23,6 +24,7 @@
     "svelte": "^5.57.3",
     "svelte-check": "^4.7.7",
     "typescript": "5.9.3",
+    "web-ext": "^10.8.0",
     "wxt": "^0.21.5"
   }
 }

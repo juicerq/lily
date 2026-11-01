@@ -1,0 +1,26 @@
+{
+  "categories": [
+    "other"
+  ],
+  "summary": {
+    "en-US": "Block distracting sites during the hours you choose and give each one a daily time budget. Minimal, monochrome and fast. Interface in Brazilian Portuguese.",
+    "pt-BR": "Bloqueie sites que distraem nos horários que você escolher e dê a cada um uma cota diária de tempo. Minimalista, monocromático e rápido."
+  },
+  "description": {
+    "en-US": "Lily blocks the sites that eat your time, with two simple rules per site:\n\n• Blocked hours: paint the half hours of the week on a grid. Sites that follow the schedule are blocked inside those hours.\n• Daily quota: each site gets a time budget per day. When it runs out, the site is blocked until midnight. A quota of 0 means always blocked.\n\nTime only counts while the tab is active in a focused window. It pauses after 60 seconds without input, unless media is playing.\n\nThe block page shows why the site is blocked and when it opens again. Outside blocked hours you can unlock a site for 5 minutes, at most twice a day, after a 30-second wait.\n\nA notification warns you 1 minute before a block starts.\n\nLily stores everything locally in the browser. It collects no data and makes no network requests.\n\nThe interface is in Brazilian Portuguese.\n\nSource code: https://github.com/juicerq/lily",
+    "pt-BR": "A Lily bloqueia os sites que roubam seu tempo, com duas regras simples por site:\n\n• Horários bloqueados: pinte as meias horas da semana numa grade. Os sites que seguem os horários ficam bloqueados dentro deles.\n• Cota diária: cada site tem um tempo por dia. Quando acaba, o site fica bloqueado até a meia-noite. Cota 0 quer dizer sempre bloqueado.\n\nO tempo só conta com a aba ativa numa janela em foco. Ele pausa depois de 60 segundos sem uso, exceto com mídia tocando.\n\nA página de bloqueio mostra o motivo e quando o site libera. Fora dos horários bloqueados, dá para liberar um site por 5 minutos, no máximo 2 vezes por dia, depois de esperar 30 segundos.\n\nUma notificação avisa 1 minuto antes de um bloqueio começar.\n\nA Lily guarda tudo localmente no navegador. Ela não coleta dados e não faz requisições de rede.\n\nCódigo-fonte: https://github.com/juicerq/lily"
+  },
+  "homepage": {
+    "en-US": "https://github.com/juicerq/lily"
+  },
+  "support_url": {
+    "en-US": "https://github.com/juicerq/lily/issues"
+  },
+  "version": {
+    "license": "MIT",
+    "approval_notes": "The extension is built from TypeScript and Svelte with WXT (Vite). The uploaded source archive contains everything needed.\n\nTo reproduce the build:\n1. Install Bun 1.4 or newer: https://bun.sh\n2. bun install --frozen-lockfile\n3. LILY_AMO=1 bun run build\n\nThe output is in .output/firefox-mv3 and matches the submitted package.\n\nThe fonts in public/fonts (Doto, Space Mono) are from Google Fonts under the SIL Open Font License and are bundled so the extension makes no network requests.",
+    "compatibility": [
+      "firefox"
+    ]
+  }
+}
