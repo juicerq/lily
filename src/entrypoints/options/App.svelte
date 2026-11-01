@@ -9,7 +9,7 @@
   import { formatClock, formatDuration, formatMinutes } from "@/lib/format";
   import { inWindow, nextWindowStart, normalizeDomain } from "@/lib/rules";
   import { loadSnapshot, type Snapshot } from "@/lib/snapshot";
-  import { SLOTS_PER_DAY, WEEKDAYS, slotOf, weekday } from "@/lib/time";
+  import { SLOTS_PER_DAY, WEEKDAYS, weekday } from "@/lib/time";
   import { usedSeconds } from "@/lib/usage";
 
   let { initial }: { initial: Snapshot } = $props();
@@ -28,7 +28,7 @@
 
   const config = $derived(snapshot.config);
   const today = $derived(weekday(now));
-  const nowSlot = $derived(slotOf(now));
+  const dayProgress = $derived((now.getHours() * 60 + now.getMinutes()) / (24 * 60));
   const weekSlots = $derived(config.schedule.reduce((sum, day) => sum + countSlots(day), 0));
   const windowStart = $derived(nextWindowStart(config.schedule, now));
   const blockedNow = $derived(inWindow(config.schedule, now));
@@ -266,13 +266,13 @@
     <div class="label head"><span>Horários bloqueados</span><span>arraste para pintar</span></div>
 
     <div class="grid" role="grid" aria-label="Horários bloqueados por dia e meia hora" tabindex="-1" onkeydown={onGridKey}>
+      <i class="now-line" aria-hidden="true" style:left="calc(34px + (100% - 86px) * {dayProgress})"></i>
       {#each WEEKDAYS as name, day (name)}
         <div class="day" class:today={day === today}>{name}</div>
         <div class="slots" role="row">
           {#each { length: SLOTS_PER_DAY } as _, slot (slot)}
             <button
               class="cell"
-              class:now={day === today && slot === nowSlot}
               role="gridcell"
               aria-label="{name} {slotLabel(slot)}"
               aria-selected={isPainted(day, slot)}
@@ -440,6 +440,7 @@
   }
 
   .grid {
+    position: relative;
     margin-top: 14px;
     display: grid;
     grid-template-columns: 34px 1fr 52px;
@@ -461,6 +462,8 @@
   }
 
   .slots {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: repeat(48, 1fr);
   }
@@ -501,21 +504,22 @@
     background: #cfcfcf;
   }
 
-  .cell:focus-visible::after {
-    content: "";
-    position: absolute;
-    inset: 0 1px;
-    border-radius: 4px;
-    box-shadow: 0 0 0 1px var(--fg);
+  .cell:focus-visible::before {
+    box-shadow:
+      0 0 0 2px var(--panel),
+      0 0 0 3px var(--fg);
   }
 
-  .cell.now::after {
-    content: "";
+  .now-line {
     position: absolute;
-    inset: -2px 2px;
-    border-radius: 99px;
-    box-shadow: inset 0 0 0 1px var(--mute);
+    top: -4px;
+    bottom: 18px;
+    width: 1px;
+    background: var(--mute);
+    pointer-events: none;
+    transition: left 0.4s var(--ease);
   }
+
 
   .total {
     font-size: 11px;

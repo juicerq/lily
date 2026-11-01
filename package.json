@@ -1,6 +1,6 @@
 {
   "name": "lily",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "devDependencies": {
     "@wxt-dev/module-svelte": "^2.0.5",
     "oxlint": "^1.90.0",
