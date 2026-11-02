@@ -37,4 +37,3 @@ Gere as chaves em https://addons.mozilla.org/developers/addon/api/key/.
 3. `LILY_AMO=1 bun run build`
 
 O resultado fica em `.output/firefox-mv3`.
-
