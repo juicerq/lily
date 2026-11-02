@@ -46,43 +46,13 @@ Depois da primeira instalação, o navegador consulta o [`updates.json`](updates
 
 ### Firefox
 
-O manifest exige Firefox 140 ou mais novo. Para experimentar a build local, abra `about:debugging#/runtime/this-firefox`, clique em **Carregar extensão temporária** e selecione `.output/firefox-mv3/manifest.json` após executar `bun run build`. A instalação temporária dura até o navegador ser fechado.
+A extensão requer Firefox 140 ou mais novo.
 
 ## Privacidade
 
 Configurações, contadores de uso e registro de diagnóstico ficam no armazenamento local do navegador. A extensão não envia esses dados a servidores, não usa analytics e inclui as fontes no pacote. O navegador consulta o GitHub para atualizar a versão instalada pelo `.xpi`.
 
 As permissões permitem observar abas e navegações para contar uso e redirecionar sites bloqueados, detectar ociosidade, agendar bloqueios, guardar dados e exibir avisos. Detalhes do funcionamento estão na [especificação](docs/spec.md).
-
-## Desenvolvimento
-
-Requer [Bun](https://bun.sh) 1.4 ou mais novo e Firefox ou Zen.
-
-```sh
-bun install --frozen-lockfile
-bun run dev
-```
-
-O modo de desenvolvimento abre um perfil temporário e recarrega a extensão a cada mudança. Para usar um binário específico, crie `web-ext.config.ts` na raiz (ignorado pelo git):
-
-```ts
-import { defineWebExtConfig } from "wxt";
-
-export default defineWebExtConfig({
-  binaries: { firefox: "/caminho/para/firefox-ou-zen" },
-});
-```
-
-```sh
-bun run check
-bun run lint
-bun run build
-bun run xpi
-```
-
-A build fica em `.output/firefox-mv3`; o pacote instalável, em `.output/lily.xpi`. O GitHub Actions executa tipagem, lint e build em pushes e pull requests.
-
-Veja [como publicar uma versão e enviar ao AMO](docs/releasing.md).
 
 ## Licença
 
