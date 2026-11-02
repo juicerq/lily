@@ -28,3 +28,17 @@ export function startOfDay(date: Date) {
 export function nextMidnight(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
 }
+
+function pad(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+export function localIso(timestamp: number) {
+  const date = new Date(timestamp);
+  const offset = -date.getTimezoneOffset();
+  const sign = offset < 0 ? "-" : "+";
+  const zone = `${sign}${pad(Math.floor(Math.abs(offset) / 60))}:${pad(Math.abs(offset) % 60)}`;
+  const clock = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+
+  return `${dayKey(date)}T${clock}${zone}`;
+}

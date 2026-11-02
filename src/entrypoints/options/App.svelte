@@ -6,18 +6,22 @@
   import Logo from "@/components/Logo.svelte";
   import Switch from "@/components/Switch.svelte";
   import { saveConfig, type SiteRule } from "@/lib/config";
+  import { clockInfo, diagnose } from "@/lib/diagnostics";
   import { formatClock, formatDuration, formatMinutes } from "@/lib/format";
+  import { describeEntry, loadJournal, type Journal } from "@/lib/journal";
   import { inWindow, nextWindowStart, normalizeDomain } from "@/lib/rules";
   import { loadSnapshot, type Snapshot } from "@/lib/snapshot";
   import { SLOTS_PER_DAY, WEEKDAYS, slotOf, weekday } from "@/lib/time";
   import { usedSeconds } from "@/lib/usage";
 
-  let { initial }: { initial: Snapshot } = $props();
+  let { initial, initialJournal }: { initial: Snapshot; initialJournal: Journal } = $props();
 
   const QUOTA_STEPS = [0, 5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 240, null] as const;
   const HOURS = ["00", "03", "06", "09", "12", "15", "18", "21"];
 
   let snapshot = $state(untrack(() => initial));
+  let journal = $state(untrack(() => initialJournal));
+  let copied = $state(false);
   let now = $state(new Date());
   let saveError = $state("");
   let painting: boolean | null = $state(null);
@@ -34,6 +38,8 @@
   const weekSlots = $derived(config.schedule.reduce((sum, day) => sum + countSlots(day), 0));
   const windowStart = $derived(nextWindowStart(config.schedule, now));
   const blockedNow = $derived(inWindow(config.schedule, now));
+  const clock = $derived(clockInfo(now));
+  const recent = $derived(journal.entries.slice(-12).reverse());
 
   $effect(() => {
     const timer = setInterval(() => {
@@ -45,6 +51,10 @@
 
   $effect(() => {
     const reload = async (changes: Record<string, unknown>) => {
+      if ("journal" in changes) {
+        journal = await loadJournal();
+      }
+
       const fresh = await loadSnapshot(new Date());
       const external = "config" in changes && painting === null && JSON.stringify(fresh.config) !== JSON.stringify(snapshot.config);
       const nextConfig = external ? fresh.config : snapshot.config;
@@ -56,6 +66,25 @@
 
     return () => browser.storage.onChanged.removeListener(reload);
   });
+
+  function formatOffset(minutes: number) {
+    const sign = minutes < 0 ? "−" : "+";
+    const hours = String(Math.floor(Math.abs(minutes) / 60)).padStart(2, "0");
+    const rest = String(Math.abs(minutes) % 60).padStart(2, "0");
+
+    return `UTC${sign}${hours}:${rest}`;
+  }
+
+  async function copyReport() {
+    const alarms = await browser.alarms.getAll();
+    const report = diagnose({ snapshot, journal, alarms, version: browser.runtime.getManifest().version, now: new Date() });
+
+    await navigator.clipboard.writeText(JSON.stringify(report, null, 2));
+    copied = true;
+    setTimeout(() => {
+      copied = false;
+    }, 2000);
+  }
 
   function countSlots(day: string) {
     return day.split("").filter((slot) => slot === "1").length;
@@ -376,6 +405,26 @@
       />
     </section>
   </div>
+
+  <section class="card">
+    <div class="label head">
+      <span>Diagnóstico</span>
+      <button class="copy" onclick={copyReport}>{copied ? "copiado" : "copiar relatório"}</button>
+    </div>
+    <p class="clock">{clock.timeZone} · {formatOffset(clock.offsetMinutes)} · dia {clock.day}</p>
+    {#if recent.length}
+      <ol class="events">
+        {#each recent as entry, index (`${entry.at}-${index}`)}
+          <li>
+            <time>{formatClock(entry.at, now)}</time>
+            <span>{describeEntry(entry, now)}</span>
+          </li>
+        {/each}
+      </ol>
+    {:else}
+      <p class="empty">Nenhum evento registrado ainda.</p>
+    {/if}
+  </section>
 </main>
 
 <style>
@@ -753,6 +802,45 @@
     font-size: 11px;
     color: var(--soft);
     line-height: 1.5;
+  }
+
+  .copy {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--mute);
+    transition: color 0.12s;
+  }
+
+  .copy:hover {
+    color: var(--fg);
+  }
+
+  .clock {
+    margin: 10px 0 0;
+    font-size: 11px;
+    color: var(--soft);
+  }
+
+  .events {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+  }
+
+  .events li {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 12px;
+    padding: 6px 0;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--soft);
+  }
+
+  .events time {
+    color: var(--mute);
+    font-variant-numeric: tabular-nums;
   }
 
   @media (max-width: 640px) {

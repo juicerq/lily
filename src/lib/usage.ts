@@ -26,36 +26,34 @@ function emptyUsage(now: Date): Usage {
 
 export function parseUsage(raw: unknown, now: Date) {
   if (raw === undefined) {
-    return emptyUsage(now);
+    return { value: emptyUsage(now), issue: null };
   }
 
   const parsed = v.safeParse(Usage, raw);
 
   if (!parsed.success) {
-    console.error("lily: uso inválido", v.summarize(parsed.issues));
-    return emptyUsage(now);
+    return { value: emptyUsage(now), issue: v.summarize(parsed.issues) };
   }
 
   if (parsed.output.day !== dayKey(now)) {
-    return emptyUsage(now);
+    return { value: emptyUsage(now), issue: null };
   }
 
-  return parsed.output;
+  return { value: parsed.output, issue: null };
 }
 
 export function parseSession(raw: unknown) {
   if (raw === undefined || raw === null) {
-    return null;
+    return { value: null, issue: null };
   }
 
   const parsed = v.safeParse(Session, raw);
 
   if (!parsed.success) {
-    console.error("lily: sessão inválida", v.summarize(parsed.issues));
-    return null;
+    return { value: null, issue: v.summarize(parsed.issues) };
   }
 
-  return parsed.output;
+  return { value: parsed.output, issue: null };
 }
 
 export function sessionSeconds(session: Session, now: Date) {

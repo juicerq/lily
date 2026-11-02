@@ -47,5 +47,7 @@ A página de bloqueio mostra o motivo e o horário em que libera.
 | `popup` | Só lê. Abre lendo o storage em uma chamada, sem esperar o background. |
 | `blocked` | Mostra o motivo e a contagem. Pede o escape ao background por mensagem. Volta sozinha para a URL quando o site libera. |
 | `lib/rules` | Funções puras: dado config, uso e horário, devolve o estado de cada site. Usadas por todas as partes. |
+| `lib/journal` | Registro em `storage.local.journal`, últimos 300 eventos. Só o background grava: virada do dia, site bloqueado ou liberado, escape, storage inválido. Grava só quando algo muda. |
+| `lib/diagnostics` | Monta o relatório que as opções copiam: relógio com fuso, horários, uso, estado de cada site, alarmes e journal, tudo em hora local com offset. |
 
 O background do Firefox MV3 é descarregado quando fica ocioso. Por isso a contagem guarda o início da sessão em `storage.session` e soma o tempo decorrido quando algo muda: troca de aba, foco, ociosidade, alarme de 1 min.

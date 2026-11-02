@@ -39,23 +39,16 @@ export const defaultConfig: Config = {
 
 export function parseConfig(raw: unknown) {
   if (raw === undefined) {
-    return defaultConfig;
+    return { value: defaultConfig, issue: null };
   }
 
   const parsed = v.safeParse(Config, raw);
 
   if (!parsed.success) {
-    console.error("lily: config inválida", v.summarize(parsed.issues));
-    return defaultConfig;
+    return { value: defaultConfig, issue: v.summarize(parsed.issues) };
   }
 
-  return parsed.output;
-}
-
-export async function loadConfig() {
-  const { config } = await browser.storage.local.get("config");
-
-  return parseConfig(config);
+  return { value: parsed.output, issue: null };
 }
 
 export async function saveConfig(config: Config) {

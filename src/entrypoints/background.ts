@@ -2,6 +2,7 @@ import * as v from "valibot";
 import { browser, type Browser } from "wxt/browser";
 
 import { formatDuration } from "@/lib/format";
+import { append, loadJournal, observe, saveJournal } from "@/lib/journal";
 import { EscapeRequest, type EscapeResult } from "@/lib/messages";
 import { canEscape, hostOf, matchSite, nextChange, nextWindowStart, statusOf } from "@/lib/rules";
 import { loadSnapshot, type Snapshot } from "@/lib/snapshot";
@@ -168,6 +169,11 @@ async function reconcile() {
   ]);
 
   const current: Snapshot = { ...settled, session };
+  const journal = observe(await loadJournal(), current, now);
+
+  if (journal) {
+    await saveJournal(journal);
+  }
 
   await sweep(current, now);
   await scheduleAlarms(current, now);
@@ -215,13 +221,15 @@ async function grantEscape(domain: string): Promise<EscapeResult> {
     return { ok: false };
   }
 
+  const until = now.getTime() + ESCAPE_SECONDS * 1000;
   const usage: Usage = {
     ...snapshot.usage,
     escapes: snapshot.usage.escapes + 1,
-    allow: { ...snapshot.usage.allow, [domain]: now.getTime() + ESCAPE_SECONDS * 1000 },
+    allow: { ...snapshot.usage.allow, [domain]: until },
   };
+  const journal = append(await loadJournal(), [{ kind: "escape", at: now.getTime(), domain, until }]);
 
-  await browser.storage.local.set({ usage });
+  await browser.storage.local.set({ usage, journal });
   await reconcile();
 
   return { ok: true };

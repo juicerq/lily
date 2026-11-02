@@ -1,6 +1,7 @@
 import { mount } from "svelte";
 
 import "@/assets/theme.css";
+import { loadJournal } from "@/lib/journal";
 import { loadSnapshot } from "@/lib/snapshot";
 
 import App from "./App.svelte";
@@ -12,7 +13,9 @@ async function start() {
     throw new Error("lily: #app ausente");
   }
 
-  mount(App, { target, props: { initial: await loadSnapshot(new Date()) } });
+  const [snapshot, journal] = await Promise.all([loadSnapshot(new Date()), loadJournal()]);
+
+  mount(App, { target, props: { initial: snapshot, initialJournal: journal } });
 }
 
 void start();

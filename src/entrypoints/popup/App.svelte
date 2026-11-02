@@ -9,6 +9,7 @@
   import { siteRows, type SiteRow } from "@/lib/rows";
   import { hostOf, matchSite, nextWindowStart, normalizeDomain } from "@/lib/rules";
   import { loadSnapshot, type Snapshot } from "@/lib/snapshot";
+  import { MAX_ESCAPES } from "@/lib/usage";
 
   let { initial, tabUrl }: { initial: Snapshot; tabUrl: string | null } = $props();
 
@@ -21,6 +22,7 @@
   const currentSite = $derived(host ? matchSite(snapshot.config.sites, host) : undefined);
   const current = $derived(rows.find((row) => row.site.domain === currentSite?.domain));
   const candidate = $derived(host ? normalizeDomain(host) : null);
+  const escapesLeft = $derived(Math.max(0, MAX_ESCAPES - snapshot.usage.escapes));
 
   $effect(() => {
     const timer = setInterval(() => {
@@ -167,7 +169,7 @@
 
   <footer>
     <button onclick={openOptions}>Configurações</button>
-    <span>{snapshot.usage.escapes}/2 liberações hoje</span>
+    <span>{escapesLeft === 1 ? "1 liberação restante" : `${escapesLeft} liberações restantes`}</span>
   </footer>
 </main>
 
