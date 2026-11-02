@@ -78,12 +78,7 @@
     location.replace(url);
   }
 
-  async function goBack() {
-    if (history.length > 1) {
-      history.back();
-      return;
-    }
-
+  async function closeTab() {
     const tab = await browser.tabs.getCurrent();
 
     if (tab?.id !== undefined) {
@@ -131,7 +126,7 @@
     }
 
     if (snapshot.usage.escapes >= MAX_ESCAPES) {
-      return `Você já liberou ${MAX_ESCAPES}× hoje.`;
+      return `Voce usou desbloqueio ${MAX_ESCAPES}x hoje`;
     }
 
     return null;
@@ -157,7 +152,7 @@
       <p class="why">{reasonText()}</p>
 
       <div class="actions">
-        <button class="primary" onclick={goBack}>Voltar</button>
+        <button class="primary" onclick={closeTab}>Fechar aba</button>
 
         {#if waiting !== null}
           <button class="secondary waiting" onclick={() => (waiting = null)}>
