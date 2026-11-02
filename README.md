@@ -1,76 +1,89 @@
-<img src="public/icon.svg" width="64" height="64" alt="">
+<img src="public/icon.svg" width="64" height="64" alt="Logo da Lily">
 
 # Lily
 
-Extensão para Firefox e Zen: horários bloqueados e cota diária por site.
+Horários e cotas diárias para os sites que roubam seu tempo.
 
-As regras e decisões estão em [docs/spec.md](docs/spec.md).
+Extensão para Firefox e Zen, com interface em português, visual monocromático e dados guardados no próprio navegador. Feita com Svelte 5, TypeScript e WXT.
 
-## Rodar
+[Baixar a última versão](https://github.com/juicerq/lily/releases/latest) · [Regras e arquitetura](docs/spec.md) · [Licença MIT](LICENSE)
+
+![Configurações da Lily com grade semanal de horários bloqueados e cotas por site](docs/images/options.png)
+
+## Como funciona
+
+Pinte os horários da semana em que quer evitar distrações e defina uma cota diária para cada site. Por exemplo: YouTube com 1h por dia e bloqueado das 14h às 18h. Às 15h, a Lily bloqueia o acesso mesmo que ainda sobre cota; fora desse horário, você usa o tempo restante até a cota acabar.
+
+- **Grade semanal:** blocos de meia hora, editáveis com o mouse ou teclado.
+- **Cotas por site:** zeram à meia-noite; cota 0 mantém o site sempre bloqueado, e sem cota ele segue apenas os horários.
+- **Tempo de uso:** conta na aba ativa da janela em foco. Pausa após 60s sem interação, exceto com mídia tocando.
+- **Liberação de 5 min:** espera de 30s com a página visível, até duas vezes por dia, fora dos horários bloqueados.
+- **Avisos:** notificação 1 min antes do horário começar ou da cota acabar.
+
+### Na barra do navegador
+
+O popup mostra o tempo restante da aba atual e o estado dos outros sites.
+
+<img src="docs/images/popup.png" width="340" alt="Popup da Lily com 18 minutos restantes no Twitch e lista dos sites bloqueados">
+
+### Quando é hora de parar
+
+A tela de bloqueio explica o motivo e mostra quando o site estará disponível de novo.
+
+![Tela de bloqueio do YouTube até as 18h, com opção de fechar a aba](docs/images/blocked.png)
+
+As capturas usam a interface real da extensão com dados de exemplo.
+
+## Instalar
+
+### Zen
+
+1. Baixe o arquivo `.xpi` em [Releases](https://github.com/juicerq/lily/releases/latest).
+2. Em `about:config`, defina `xpinstall.signatures.required` como `false` para permitir o pacote sem assinatura.
+3. Em `about:addons`, abra a engrenagem → **Instalar extensão de um arquivo** e escolha o `.xpi`.
+
+Depois da primeira instalação, o navegador consulta o [`updates.json`](updates.json) para buscar novas versões publicadas neste repositório.
+
+### Firefox
+
+O manifest exige Firefox 140 ou mais novo. Para experimentar a build local, abra `about:debugging#/runtime/this-firefox`, clique em **Carregar extensão temporária** e selecione `.output/firefox-mv3/manifest.json` após executar `bun run build`. A instalação temporária dura até o navegador ser fechado.
+
+## Privacidade
+
+Configurações, contadores de uso e registro de diagnóstico ficam no armazenamento local do navegador. A extensão não envia esses dados a servidores, não usa analytics e inclui as fontes no pacote. O navegador consulta o GitHub para atualizar a versão instalada pelo `.xpi`.
+
+As permissões permitem observar abas e navegações para contar uso e redirecionar sites bloqueados, detectar ociosidade, agendar bloqueios, guardar dados e exibir avisos. Detalhes do funcionamento estão na [especificação](docs/spec.md).
+
+## Desenvolvimento
+
+Requer [Bun](https://bun.sh) 1.4 ou mais novo e Firefox ou Zen.
 
 ```sh
-bun install
+bun install --frozen-lockfile
 bun run dev
 ```
 
-`bun run dev` abre o navegador com um perfil temporário e recarrega a extensão a cada mudança. O binário fica em `web-ext.config.ts`, que não vai para o git.
+O modo de desenvolvimento abre um perfil temporário e recarrega a extensão a cada mudança. Para usar um binário específico, crie `web-ext.config.ts` na raiz (ignorado pelo git):
 
-## Instalar no Zen
+```ts
+import { defineWebExtConfig } from "wxt";
 
-O Zen aceita extensões sem assinatura da Mozilla.
-
-1. Em `about:config`, mude `xpinstall.signatures.required` para `false`.
-2. Gere o pacote:
-
-   ```sh
-   bun run xpi
-   ```
-
-3. Em `about:addons`, clique na engrenagem, depois em "Instalar extensão de um arquivo", e escolha `.output/lily.xpi`.
-
-Depois da primeira instalação, a extensão se atualiza sozinha. Ela consulta o [`updates.json`](updates.json) deste repositório e baixa o `.xpi` do release mais novo.
-
-Para checar mais vezes que 1× por dia, mude `extensions.update.interval` em `about:config` para `3600` (segundos). Para forçar na hora: `about:addons` → engrenagem → "Procurar atualizações".
-
-## Publicar uma versão
-
-```sh
-bun run release          # 0.1.2 → 0.1.3
-bun run release minor    # 0.1.2 → 0.2.0
+export default defineWebExtConfig({
+  binaries: { firefox: "/caminho/para/firefox-ou-zen" },
+});
 ```
-
-O script exige o `main` limpo. Ele sobe a versão, roda as checagens, gera o `.xpi`, cria o release no GitHub e atualiza o `updates.json`.
-
-Com as chaves do AMO no `.env`, o mesmo comando também envia a versão para a loja.
-
-## Loja do Firefox (AMO)
-
-```sh
-bun run amo
-```
-
-O script gera a build da loja com `LILY_AMO=1`, que tira o `update_url` do manifest. Depois ele envia o pacote, o código-fonte e os textos de [`amo/metadata.json`](amo/metadata.json) com `web-ext sign`.
-
-As chaves ficam no `.env`, que não vai para o git:
-
-```sh
-WEB_EXT_API_KEY=user:12345:67
-WEB_EXT_API_SECRET=...
-```
-
-Gere as chaves em https://addons.mozilla.org/developers/addon/api/key/.
-
-### Build para revisores
-
-1. Instale o Bun 1.4 ou mais novo.
-2. `bun install --frozen-lockfile`
-3. `LILY_AMO=1 bun run build`
-
-O resultado fica em `.output/firefox-mv3`.
-
-## Checagens
 
 ```sh
 bun run check
 bun run lint
+bun run build
+bun run xpi
 ```
+
+A build fica em `.output/firefox-mv3`; o pacote instalável, em `.output/lily.xpi`. O GitHub Actions executa tipagem, lint e build em pushes e pull requests.
+
+Veja [como publicar uma versão e enviar ao AMO](docs/releasing.md).
+
+## Licença
+
+Código sob a [licença MIT](LICENSE). As fontes Doto e Space Mono são distribuídas sob a SIL Open Font License; os respectivos textos estão em [`public/fonts`](public/fonts).
