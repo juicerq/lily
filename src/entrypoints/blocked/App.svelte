@@ -171,9 +171,7 @@
         {/if}
       </div>
 
-      {#if waiting !== null}
-        <p class="note">A contagem pausa se você sair desta aba.</p>
-      {:else if escapeNote()}
+      {#if waiting === null && escapeNote()}
         <p class="note">{escapeNote()}</p>
       {/if}
     </div>
