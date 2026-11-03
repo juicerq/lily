@@ -98,6 +98,11 @@
     await browser.runtime.openOptionsPage();
     window.close();
   }
+
+  async function openWeek() {
+    await browser.tabs.create({ url: browser.runtime.getURL("/week.html") });
+    window.close();
+  }
 </script>
 
 <main>
@@ -168,7 +173,10 @@
   {/if}
 
   <footer>
-    <button onclick={openOptions}>Configurações</button>
+    <span class="links">
+      <button onclick={openOptions}>Configurações</button>
+      <button onclick={openWeek}>Semana</button>
+    </span>
     <span>{escapesLeft === 1 ? "1 liberação restante" : `${escapesLeft} liberações restantes`}</span>
   </footer>
 </main>
@@ -342,6 +350,11 @@
     padding: 12px 2px 0;
     margin-top: 6px;
     border-top: 1px solid var(--line);
+  }
+
+  .links {
+    display: flex;
+    gap: 14px;
   }
 
   footer button {

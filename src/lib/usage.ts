@@ -11,6 +11,7 @@ export const Usage = v.object({
 
 export const Session = v.object({
   domain: v.pipe(v.string(), v.minLength(1)),
+  listed: v.boolean(),
   start: v.number(),
 });
 
@@ -65,7 +66,7 @@ export function sessionSeconds(session: Session, now: Date) {
 export function usedSeconds(input: { usage: Usage; session: Session | null; domain: string; now: Date }) {
   const stored = input.usage.seconds[input.domain] ?? 0;
 
-  if (input.session?.domain !== input.domain) {
+  if (!input.session?.listed || input.session.domain !== input.domain) {
     return stored;
   }
 

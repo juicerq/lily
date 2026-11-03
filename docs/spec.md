@@ -37,6 +37,9 @@ A página de bloqueio mostra o motivo e o horário em que libera.
 | Site | Domínio + subdomínios. `m.youtube.com` conta como `youtube.com`. Bloqueio por caminho fica para depois. |
 | Escape | "Liberar 5 min": espera de 30s com a página visível, no máximo 2 vezes por dia, nunca dentro de um horário bloqueado. Global. |
 | Aviso | Notificação 1 min antes de um horário começar ou de a cota acabar, se a aba ativa estiver no site. Global. |
+| Histórico | Um registro por dia em `storage.local`, chave `day:AAAA-MM-DD`, guardado por 84 dias. Guarda segundos por meia hora de cada site da lista, tempo total por domínio fora da lista, tentativas bloqueadas, liberações, cotas e a linha de horários do dia. |
+| Fora da lista | Conta com as mesmas regras de foco e ociosidade, por domínio sem `www.`, sem divisão por meia hora. Não entra em cota nem aparece no extrato. |
+| Tentativa | Navegação para um site bloqueado que a Lily redireciona. Mudanças de estado com a aba já aberta não contam. |
 
 ## Arquitetura
 
@@ -44,10 +47,14 @@ A página de bloqueio mostra o motivo e o horário em que libera.
 |---|---|
 | `background` | Único dono do uso (`usage`). Conta tempo por eventos, agenda alarmes, redireciona abas bloqueadas, notifica. |
 | `options` | Único dono da configuração (`config`). Grava direto no `storage.local` a cada mudança. |
+| `week` | Página da semana: uso por site, mapa de meias horas, leitura da semana, sites fora da lista e extrato em PNG de 1080 × 1350. Só lê o histórico. Grava a configuração ao pintar um horário ou adicionar um site. |
 | `popup` | Só lê. Abre lendo o storage em uma chamada, sem esperar o background. |
 | `blocked` | Mostra o motivo e a contagem. Pede o escape ao background por mensagem. Volta sozinha para a URL quando o site libera. |
 | `lib/rules` | Funções puras: dado config, uso e horário, devolve o estado de cada site. Usadas por todas as partes. |
+| `lib/history` | Lê e grava os registros diários. Só o background grava. Apaga registros com mais de 84 dias na primeira gravação de cada dia. |
+| `lib/week` | Funções puras que resumem uma semana: totais, dias com cota esgotada, picos fora dos horários, tentativas e domínios fora da lista. |
+| `lib/receipt` | Desenha o extrato da semana num canvas. |
 | `lib/journal` | Registro em `storage.local.journal`, últimos 300 eventos. Só o background grava: virada do dia, site bloqueado ou liberado, escape, storage inválido. Grava só quando algo muda. |
 | `lib/diagnostics` | Monta o relatório que as opções copiam: relógio com fuso, horários, uso, estado de cada site, alarmes e journal, tudo em hora local com offset. |
 
-O background do Firefox MV3 é descarregado quando fica ocioso. Por isso a contagem guarda o início da sessão em `storage.session` e soma o tempo decorrido quando algo muda: troca de aba, foco, ociosidade, alarme de 1 min.
+O background do Firefox MV3 é descarregado quando fica ocioso. Por isso a contagem guarda o início da sessão em `storage.session` e soma o tempo decorrido quando algo muda: troca de aba, foco, ociosidade, alarme de 1 min. A sessão marca se o domínio está na lista. Só o tempo dos sites da lista entra no `usage`; o histórico recebe os dois.

@@ -2,11 +2,12 @@ import * as v from "valibot";
 import { browser, type Browser } from "wxt/browser";
 
 import { formatDuration } from "@/lib/format";
+import { addTime, updateDay as writeDay } from "@/lib/history";
 import { append, loadJournal, observe, saveJournal } from "@/lib/journal";
 import { EscapeRequest, type EscapeResult } from "@/lib/messages";
-import { canEscape, hostOf, matchSite, nextChange, nextWindowStart, statusOf } from "@/lib/rules";
+import { canEscape, hostOf, matchSite, nextChange, nextWindowStart, normalizeDomain, statusOf } from "@/lib/rules";
 import { loadSnapshot, type Snapshot } from "@/lib/snapshot";
-import { nextMidnight } from "@/lib/time";
+import { nextMidnight, startOfDay } from "@/lib/time";
 import { ESCAPE_SECONDS, sessionSeconds, type Session, type Usage } from "@/lib/usage";
 
 const IDLE_SECONDS = 60;
@@ -24,6 +25,12 @@ function serialized<T>(task: () => Promise<T>) {
   return run;
 }
 
+async function updateDay(input: Parameters<typeof writeDay>[0]) {
+  await writeDay(input).catch((error: unknown) => {
+    console.error("lily: histórico não gravado", error);
+  });
+}
+
 function blockedPage(url: string) {
   return `${browser.runtime.getURL("/blocked.html")}?u=${encodeURIComponent(url)}`;
 }
@@ -37,15 +44,21 @@ function blockedTarget(snapshot: Snapshot, url: string, now: Date) {
 
   const site = matchSite(snapshot.config.sites, host);
 
-  if (!site || statusOf(snapshot, site, now).kind !== "blocked") {
+  if (!site) {
     return null;
   }
 
-  return blockedPage(url);
+  const status = statusOf(snapshot, site, now);
+
+  if (status.kind !== "blocked") {
+    return null;
+  }
+
+  return { url: blockedPage(url), domain: site.domain, reason: status.reason };
 }
 
 function flush(usage: Usage, session: Session | null, now: Date): Usage {
-  if (!session) {
+  if (!session?.listed) {
     return usage;
   }
 
@@ -74,7 +87,7 @@ async function trackedDomain(snapshot: Snapshot, now: Date) {
 
   const site = matchSite(snapshot.config.sites, host);
 
-  if (!site || statusOf(snapshot, site, now).kind === "blocked") {
+  if (site && statusOf(snapshot, site, now).kind === "blocked") {
     return null;
   }
 
@@ -84,7 +97,13 @@ async function trackedDomain(snapshot: Snapshot, now: Date) {
     return null;
   }
 
-  return site.domain;
+  if (site) {
+    return { domain: site.domain, listed: true };
+  }
+
+  const domain = normalizeDomain(host);
+
+  return domain ? { domain, listed: false } : null;
 }
 
 async function redirectIfBlocked(snapshot: Snapshot, tab: Browser.tabs.Tab, now: Date) {
@@ -98,7 +117,7 @@ async function redirectIfBlocked(snapshot: Snapshot, tab: Browser.tabs.Tab, now:
     return;
   }
 
-  await browser.tabs.update(tab.id, { url: target });
+  await browser.tabs.update(tab.id, { url: target.url });
 }
 
 async function sweep(snapshot: Snapshot, now: Date) {
@@ -160,8 +179,18 @@ async function reconcile() {
   const now = new Date();
   const snapshot = await loadSnapshot(now);
   const settled: Snapshot = { ...snapshot, usage: flush(snapshot.usage, snapshot.session, now), session: null };
-  const domain = await trackedDomain(settled, now);
-  const session = domain ? { domain, start: now.getTime() } : null;
+  const tracked = await trackedDomain(settled, now);
+  const session = tracked ? { ...tracked, start: now.getTime() } : null;
+  const previous = snapshot.session;
+
+  await updateDay({
+    now,
+    config: snapshot.config,
+    change: (record) =>
+      previous
+        ? addTime(record, { ...previous, from: Math.max(previous.start, startOfDay(now).getTime()), to: now.getTime() })
+        : record,
+  });
 
   await Promise.all([
     browser.storage.local.set({ usage: settled.usage }),
@@ -230,6 +259,11 @@ async function grantEscape(domain: string): Promise<EscapeResult> {
   const journal = append(await loadJournal(), [{ kind: "escape", at: now.getTime(), domain, until }]);
 
   await browser.storage.local.set({ usage, journal });
+  await updateDay({
+    now,
+    config: snapshot.config,
+    change: (record) => ({ ...record, escapes: [...record.escapes, { domain, at: now.getTime() }] }),
+  });
   await reconcile();
 
   return { ok: true };
@@ -294,13 +328,22 @@ export default defineBackground({
 
       void serialized(async () => {
         const now = new Date();
-        const target = blockedTarget(await loadSnapshot(now), details.url, now);
+        const snapshot = await loadSnapshot(now);
+        const target = blockedTarget(snapshot, details.url, now);
 
         if (!target) {
           return;
         }
 
-        await browser.tabs.update(details.tabId, { url: target });
+        await browser.tabs.update(details.tabId, { url: target.url });
+        await updateDay({
+          now,
+          config: snapshot.config,
+          change: (record) => ({
+            ...record,
+            tries: [...record.tries, { domain: target.domain, at: now.getTime(), reason: target.reason }],
+          }),
+        });
       });
     });
 

@@ -2,6 +2,7 @@ import * as v from "valibot";
 import { browser } from "wxt/browser";
 
 import { formatClock } from "@/lib/format";
+import { BlockReason } from "@/lib/history";
 import { statusOf, type SiteStatus } from "@/lib/rules";
 import type { Snapshot } from "@/lib/snapshot";
 import { dayKey } from "@/lib/time";
@@ -17,7 +18,7 @@ const Entry = v.variant("kind", [
     kind: v.literal("blocked"),
     at: At,
     domain: Domain,
-    reason: v.picklist(["always", "window", "quota"]),
+    reason: BlockReason,
     until: v.nullable(v.number()),
   }),
   v.object({ kind: v.literal("free"), at: At, domain: Domain }),

@@ -1,4 +1,4 @@
-import { WEEKDAYS, dayKey, nextMidnight, weekday } from "@/lib/time";
+import { WEEKDAYS, addDays, dayKey, nextMidnight, weekday } from "@/lib/time";
 
 export function formatDuration(totalSeconds: number) {
   const seconds = Math.max(0, Math.floor(totalSeconds));
@@ -38,4 +38,20 @@ export function formatClock(timestamp: number, now: Date) {
   }
 
   return `${WEEKDAYS[weekday(date)]} ${clock}`;
+}
+
+const MONTHS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
+export function formatDay(date: Date) {
+  return `${date.getDate()} ${MONTHS[date.getMonth()]}`;
+}
+
+export function formatWeek(monday: Date) {
+  const sunday = addDays(monday, 6);
+
+  if (monday.getMonth() === sunday.getMonth()) {
+    return `${monday.getDate()} – ${formatDay(sunday)}`;
+  }
+
+  return `${formatDay(monday)} – ${formatDay(sunday)}`;
 }

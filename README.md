@@ -20,6 +20,12 @@ Pinte os horários da semana em que quer evitar distrações e defina uma cota d
 - **Liberação de 5 min:** espera de 30s com a página visível, até duas vezes por dia, fora dos horários bloqueados.
 - **Avisos:** notificação 1 min antes do horário começar ou da cota acabar.
 
+### Semana
+
+A página da semana mostra quanto tempo você passou em cada site, dia a dia, contra a cota. O mapa de meias horas mostra quando você usou e quando tentou abrir um site bloqueado. A leitura da semana aponta o trecho mais usado fora dos horários e permite pintá-lo com um clique. O extrato vira uma imagem PNG para baixar ou copiar, só com os sites da lista.
+
+Abra pelo popup ou pelas configurações. O histórico guarda as últimas 12 semanas.
+
 ### Na barra do navegador
 
 O popup mostra o tempo restante da aba atual e o estado dos outros sites.
@@ -50,7 +56,7 @@ A extensão requer Firefox 140 ou mais novo.
 
 ## Privacidade
 
-Configurações, contadores de uso e registro de diagnóstico ficam no armazenamento local do navegador. A extensão não envia esses dados a servidores, não usa analytics e inclui as fontes no pacote. O navegador consulta o GitHub para atualizar a versão instalada pelo `.xpi`.
+Configurações, contadores de uso, histórico das últimas 12 semanas e registro de diagnóstico ficam no armazenamento local do navegador. O histórico inclui o tempo por domínio dos sites fora da lista, para a página da semana sugerir novos sites; ele nunca sai do navegador e o extrato em imagem mostra só os sites da lista. A extensão não envia esses dados a servidores, não usa analytics e inclui as fontes no pacote. O navegador consulta o GitHub para atualizar a versão instalada pelo `.xpi`.
 
 As permissões permitem observar abas e navegações para contar uso e redirecionar sites bloqueados, detectar ociosidade, agendar bloqueios, guardar dados e exibir avisos. Detalhes do funcionamento estão na [especificação](docs/spec.md).
 

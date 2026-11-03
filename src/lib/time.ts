@@ -42,3 +42,15 @@ export function localIso(timestamp: number) {
 
   return `${dayKey(date)}T${clock}${zone}`;
 }
+
+export function addDays(date: Date, days: number) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+}
+
+export function mondayOf(date: Date) {
+  return addDays(startOfDay(date), -weekday(date));
+}
+
+export function slotLabel(slot: number) {
+  return `${String(Math.floor(slot / 2)).padStart(2, "0")}:${slot % 2 ? "30" : "00"}`;
+}

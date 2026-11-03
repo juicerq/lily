@@ -11,7 +11,7 @@
   import { describeEntry, loadJournal, type Journal } from "@/lib/journal";
   import { inWindow, nextWindowStart, normalizeDomain } from "@/lib/rules";
   import { loadSnapshot, type Snapshot } from "@/lib/snapshot";
-  import { SLOTS_PER_DAY, WEEKDAYS, slotOf, weekday } from "@/lib/time";
+  import { SLOTS_PER_DAY, WEEKDAYS, slotLabel, slotOf, weekday } from "@/lib/time";
   import { usedSeconds } from "@/lib/usage";
 
   let { initial, initialJournal }: { initial: Snapshot; initialJournal: Journal } = $props();
@@ -92,10 +92,6 @@
 
   function formatSlots(count: number) {
     return formatDuration(count * 30 * 60);
-  }
-
-  function slotLabel(slot: number) {
-    return `${String(Math.floor(slot / 2)).padStart(2, "0")}:${slot % 2 ? "30" : "00"}`;
   }
 
   async function commit() {
@@ -281,6 +277,7 @@
 <main>
   <div class="top">
     <Logo />
+    <a class="link" href="/week.html">semana →</a>
   </div>
 
   {#if saveError}<p class="save-error" role="alert">{saveError}</p>{/if}
@@ -443,6 +440,18 @@
     align-items: center;
   }
 
+
+  .link {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--mute);
+    text-decoration: none;
+  }
+
+  .link:hover {
+    color: var(--fg);
+  }
 
   .save-error {
     margin: 0;
