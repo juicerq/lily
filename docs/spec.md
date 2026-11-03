@@ -39,7 +39,7 @@ A página de bloqueio mostra o motivo e o horário em que libera.
 | Aviso | Notificação 1 min antes de um horário começar ou de a cota acabar, se a aba ativa estiver no site. Global. |
 | Histórico | Um registro por dia em `storage.local`, chave `day:AAAA-MM-DD`, guardado por 84 dias. Guarda segundos por meia hora de cada site da lista, tempo total por domínio fora da lista, tentativas bloqueadas, liberações, cotas e a linha de horários do dia. |
 | Fora da lista | Conta com as mesmas regras de foco e ociosidade, por domínio sem `www.`, sem divisão por meia hora. Não entra em cota nem aparece no extrato. |
-| Post isolado | Link de post do X (`/status/<id>`) ou do Instagram (`/p/`, `/reel/`, `/tv/`) mostra "Ver só este post" na tela de bloqueio. O post abre num iframe do embed oficial. Links do embed abrem em aba nova e caem no bloqueio. Não conta tempo nem libera o site. |
+| Post isolado | Link de post do X (`/status/<id>`) ou do Instagram (`/p/`, `/reel/`, `/tv/`) mostra "Ver só este post" na tela de bloqueio. O post abre num iframe do embed oficial. Links do embed abrem em aba nova e caem no bloqueio. Um link que navega dentro do iframe deixa o quadro em branco, porque o X e o Instagram recusam iframe nas outras páginas. Não conta tempo nem libera o site. |
 | Tentativa | Navegação para um site bloqueado que a Lily redireciona. Mudanças de estado com a aba já aberta não contam. |
 
 ## Arquitetura

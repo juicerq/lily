@@ -54,30 +54,6 @@
   });
 
   $effect(() => {
-    if (!post) {
-      return;
-    }
-
-    const { height } = post;
-
-    const measure = (event: MessageEvent) => {
-      if (!postFrame || event.source !== postFrame.contentWindow) {
-        return;
-      }
-
-      const parsed = v.safeParse(height, event.data);
-
-      if (parsed.success) {
-        postHeight = parsed.output;
-      }
-    };
-
-    window.addEventListener("message", measure);
-
-    return () => window.removeEventListener("message", measure);
-  });
-
-  $effect(() => {
     if (url && status?.kind !== "blocked") {
       location.replace(url);
     }
@@ -105,6 +81,18 @@
     }
 
     location.replace(url);
+  }
+
+  function measurePost(event: MessageEvent) {
+    if (!post || !postFrame || event.source !== postFrame.contentWindow) {
+      return;
+    }
+
+    const parsed = v.safeParse(post.height, event.data);
+
+    if (parsed.success) {
+      postHeight = parsed.output;
+    }
   }
 
   async function closeTab() {
@@ -161,6 +149,8 @@
     return null;
   }
 </script>
+
+<svelte:window onmessage={measurePost} />
 
 <main>
   <div class="top">
