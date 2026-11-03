@@ -161,7 +161,7 @@
   {#if status?.kind === "blocked"}
     {#if showingPost && post}
       <div class="post">
-        <iframe bind:this={postFrame} src={post.src} title="Post" style:height="{postHeight}px"></iframe>
+        <iframe bind:this={postFrame} src={post.src} title={post.kind} style:height="{postHeight}px"></iframe>
       </div>
     {:else}
       <div class="center">
@@ -181,7 +181,7 @@
 
         {#if post}
           <button class="secondary" onclick={() => (showingPost = !showingPost)}>
-            {showingPost ? "Ocultar post" : "Ver só este post"}
+            {showingPost ? `Ocultar ${post.kind}` : `Ver só este ${post.kind}`}
           </button>
         {/if}
 
