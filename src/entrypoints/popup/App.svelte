@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { i18n } from "#i18n";
   import { untrack } from "svelte";
   import { browser } from "wxt/browser";
 
@@ -46,33 +47,33 @@
     const { status } = row;
 
     if (status.kind === "blocked") {
-      return status.until === null ? "sempre" : `até ${formatClock(status.until, now)}`;
+      return status.until === null ? i18n.t("always") : i18n.t("until", [formatClock(status.until, now)]);
     }
 
     if (status.remaining === null) {
-      return "sem cota";
+      return i18n.t("unlimited");
     }
 
-    return `${formatDuration(status.remaining)} restantes`;
+    return i18n.t("remaining", [formatDuration(status.remaining)]);
   }
 
   function detail(row: SiteRow) {
     const { status, site, used } = row;
 
     if (status.kind === "blocked") {
-      const reasons = { always: "cota 0", window: "horário bloqueado", quota: "cota esgotada" };
+      const reasons = { always: i18n.t("zeroQuota"), window: i18n.t("blockedHours"), quota: i18n.t("quotaReached") };
       return reasons[status.reason];
     }
 
     if (status.allowedUntil !== null) {
-      return `liberado até ${formatClock(status.allowedUntil, now)}`;
+      return i18n.t("allowedUntil", [formatClock(status.allowedUntil, now)]);
     }
 
     if (site.quotaMinutes === null) {
-      return `${formatDuration(used)} hoje`;
+      return i18n.t("usedToday", [formatDuration(used)]);
     }
 
-    return `${formatDuration(used)} de ${formatMinutes(site.quotaMinutes)}`;
+    return i18n.t("usedOf", [formatDuration(used), formatMinutes(site.quotaMinutes)]);
   }
 
   function nextWindowNote(row: SiteRow) {
@@ -82,7 +83,7 @@
 
     const start = nextWindowStart(snapshot.config.schedule, now);
 
-    return start === null ? null : `horário bloqueado às ${formatClock(start, now)}`;
+    return start === null ? null : i18n.t("nextBlock", [formatClock(start, now)]);
   }
 
   async function addCurrent() {
@@ -108,7 +109,7 @@
 <main>
   <header>
     <Logo />
-    <span class="total">hoje <b>{formatDuration(total)}</b></span>
+    <span class="total">{i18n.t("today")} <b>{formatDuration(total)}</b></span>
   </header>
 
   {#if current}
@@ -122,22 +123,22 @@
       {#if status.kind === "blocked"}
         <div class="big">
           {#if status.until === null}
-            <span class="num doto">sempre</span>
+            <span class="num doto">{i18n.t("always")}</span>
           {:else}
             <span class="num doto">{formatClock(status.until, now)}</span>
-            <span class="label">bloqueado até</span>
+            <span class="label">{i18n.t("blockedUntil")}</span>
           {/if}
         </div>
       {:else if status.remaining !== null && site.quotaMinutes !== null}
         <div class="big">
           <span class="num doto">{formatDuration(status.remaining)}</span>
-          <span class="label">restantes hoje</span>
+          <span class="label">{i18n.t("leftToday")}</span>
         </div>
         <Dots ratio={used / (site.quotaMinutes * 60)} />
       {:else}
         <div class="big">
           <span class="num doto">{formatDuration(used)}</span>
-          <span class="label">hoje · sem cota</span>
+          <span class="label">{i18n.t("unlimitedToday")}</span>
         </div>
       {/if}
 
@@ -149,14 +150,14 @@
     <section class="tab">
       <div class="row">
         <span class="domain">{candidate}</span>
-        <span class="label">sem regra</span>
+        <span class="label">{i18n.t("noRule")}</span>
       </div>
-      <p class="empty">Esta aba não conta tempo nem bloqueia.</p>
-      <button class="add" onclick={addCurrent}><span>+ Adicionar com 30m por dia</span><span>→</span></button>
+      <p class="empty">{i18n.t("untrackedTab")}</p>
+      <button class="add" onclick={addCurrent}><span>{i18n.t("addThirty")}</span><span>→</span></button>
     </section>
   {/if}
 
-  <div class="label list-label">Sites</div>
+  <div class="label list-label">{i18n.t("sites")}</div>
 
   {#if rows.length}
     <ul>
@@ -169,15 +170,15 @@
       {/each}
     </ul>
   {:else}
-    <p class="empty">Nenhum site ainda. Adicione pela aba atual ou nas configurações.</p>
+    <p class="empty">{i18n.t("emptyPopup")}</p>
   {/if}
 
   <footer>
     <span class="links">
-      <button onclick={openOptions}>Configurações</button>
-      <button onclick={openWeek}>Semana</button>
+      <button onclick={openOptions}>{i18n.t("settings")}</button>
+      <button onclick={openWeek}>{i18n.t("week")}</button>
     </span>
-    <span>{escapesLeft === 1 ? "1 liberação restante" : `${escapesLeft} liberações restantes`}</span>
+    <span>{i18n.t("unlocksLeft", escapesLeft)}</span>
   </footer>
 </main>
 

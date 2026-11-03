@@ -1,5 +1,6 @@
 <script lang="ts">
   import * as v from "valibot";
+  import { i18n } from "#i18n";
   import { untrack } from "svelte";
   import { browser } from "wxt/browser";
 
@@ -30,6 +31,10 @@
   const escapable = $derived(status ? canEscape(snapshot, status) : false);
   const escapesLeft = $derived(MAX_ESCAPES - snapshot.usage.escapes);
   const post = $derived(url ? embedOf(url) : null);
+
+  const postLabels = $derived(post?.kind === "post"
+    ? { title: i18n.t("embeddedPost"), show: i18n.t("viewPost"), hide: i18n.t("hidePost") }
+    : { title: i18n.t("embeddedProfile"), show: i18n.t("viewProfile"), hide: i18n.t("hideProfile") });
 
   $effect(() => {
     const timer = setInterval(() => {
@@ -108,7 +113,7 @@
       return "";
     }
 
-    const headings = { always: "Sempre bloqueado", window: "Horário bloqueado até", quota: "Cota esgotada · libera às" };
+    const headings = { always: i18n.t("alwaysBlocked"), window: i18n.t("scheduleUntil"), quota: i18n.t("quotaUntil") };
 
     return headings[status.reason];
   }
@@ -119,14 +124,14 @@
     }
 
     if (status.reason === "window") {
-      return "Este site segue os horários bloqueados.";
+      return i18n.t("followsBlocked");
     }
 
     if (status.reason === "always") {
-      return "A cota deste site é 0.";
+      return i18n.t("quotaIsZero");
     }
 
-    return `Você usou ${formatDuration(used)} de ${formatMinutes(site.quotaMinutes ?? 0)} hoje.`;
+    return i18n.t("quotaUsed", [formatDuration(used), formatMinutes(site.quotaMinutes ?? 0)]);
   }
 
   function escapeNote() {
@@ -135,15 +140,15 @@
     }
 
     if (denied) {
-      return "A liberação não foi aceita.";
+      return i18n.t("unlockDenied");
     }
 
     if (status.reason === "window") {
-      return "Não dá para liberar dentro do horário bloqueado.";
+      return i18n.t("noScheduledUnlock");
     }
 
     if (snapshot.usage.escapes >= MAX_ESCAPES) {
-      return `Voce usou desbloqueio ${MAX_ESCAPES}x hoje`;
+      return i18n.t("unlocksUsed", [MAX_ESCAPES]);
     }
 
     return null;
@@ -161,14 +166,14 @@
   {#if status?.kind === "blocked"}
     {#if showingPost && post}
       <div class="post">
-        <iframe bind:this={postFrame} src={post.src} title={post.kind} style:height="{postHeight}px"></iframe>
+        <iframe bind:this={postFrame} src={post.src} title={postLabels.title} style:height="{postHeight}px"></iframe>
       </div>
     {:else}
       <div class="center">
         <div class="label">{heading()}</div>
-        <div class="clock doto">{status.until === null ? "sempre" : formatClock(status.until, now)}</div>
+        <div class="clock doto">{status.until === null ? i18n.t("always") : formatClock(status.until, now)}</div>
         {#if status.until !== null}
-          <div class="remain">libera em {formatDuration((status.until - now.getTime()) / 1000)}</div>
+          <div class="remain">{i18n.t("availableIn", [formatDuration((status.until - now.getTime()) / 1000)])}</div>
         {/if}
       </div>
     {/if}
@@ -177,22 +182,22 @@
       <p class="why">{reasonText()}</p>
 
       <div class="actions">
-        <button class="primary" onclick={closeTab}>Fechar aba</button>
+        <button class="primary" onclick={closeTab}>{i18n.t("closeTab")}</button>
 
         {#if post}
           <button class="secondary" onclick={() => (showingPost = !showingPost)}>
-            {showingPost ? `Ocultar ${post.kind}` : `Ver só este ${post.kind}`}
+            {showingPost ? postLabels.hide : postLabels.show}
           </button>
         {/if}
 
         {#if waiting !== null}
           <button class="secondary waiting" onclick={() => (waiting = null)}>
-            Aguarde {waiting}s · cancelar
+            {i18n.t("waitCancel", [waiting])}
           </button>
         {:else if escapable}
           <button class="secondary" onclick={() => (waiting = WAIT_SECONDS)}>
-            Liberar 5 min
-            <small>{escapesLeft} {escapesLeft === 1 ? "restante" : "restantes"} hoje</small>
+            {i18n.t("unlock")}
+            <small>{i18n.t("remainingToday", escapesLeft)}</small>
           </button>
         {/if}
       </div>
@@ -202,7 +207,7 @@
       {/if}
     </div>
   {:else}
-    <div class="center"><div class="label">Abrindo…</div></div>
+    <div class="center"><div class="label">{i18n.t("opening")}</div></div>
   {/if}
 </main>
 
@@ -260,7 +265,7 @@
   }
 
   .clock {
-    font-size: clamp(88px, 18vw, 168px);
+    font-size: clamp(64px, 16vw, 150px);
     line-height: 0.9;
   }
 

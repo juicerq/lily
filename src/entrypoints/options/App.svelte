@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { i18n } from "#i18n";
   import { untrack } from "svelte";
   import { browser } from "wxt/browser";
 
@@ -7,11 +8,11 @@
   import Switch from "@/components/Switch.svelte";
   import { saveConfig, type SiteRule } from "@/lib/config";
   import { clockInfo, diagnose } from "@/lib/diagnostics";
-  import { formatClock, formatDuration, formatMinutes } from "@/lib/format";
+  import { WEEKDAYS, formatClock, formatDuration, formatMinutes, formatWeekday } from "@/lib/format";
   import { describeEntry, loadJournal, type Journal } from "@/lib/journal";
   import { inWindow, nextWindowStart, normalizeDomain } from "@/lib/rules";
   import { loadSnapshot, type Snapshot } from "@/lib/snapshot";
-  import { SLOTS_PER_DAY, WEEKDAYS, slotLabel, slotOf, weekday } from "@/lib/time";
+  import { SLOTS_PER_DAY, slotLabel, slotOf, weekday } from "@/lib/time";
   import { usedSeconds } from "@/lib/usage";
 
   let { initial, initialJournal }: { initial: Snapshot; initialJournal: Journal } = $props();
@@ -101,7 +102,7 @@
       },
       (error: unknown) => {
         console.error("lily:", error);
-        saveError = "Não deu para salvar a última mudança. Tente de novo.";
+        saveError = i18n.t("saveError");
       },
     );
   }
@@ -217,12 +218,12 @@
     const domain = normalizeDomain(draft);
 
     if (!domain) {
-      draftError = "Domínio inválido. Ex: tiktok.com";
+      draftError = i18n.t("invalidDomain");
       return;
     }
 
     if (config.sites.some((site) => site.domain === domain)) {
-      draftError = `${domain} já está na lista.`;
+      draftError = i18n.t("alreadyListed", [domain]);
       return;
     }
 
@@ -245,20 +246,20 @@
 
   function quotaHint(site: SiteRule) {
     if (site.quotaMinutes === 0) {
-      return "sempre bloqueado";
+      return i18n.t("alwaysBlockedLower");
     }
 
     const used = usedSeconds({ usage: snapshot.usage, session: snapshot.session, domain: site.domain, now });
 
     if (site.quotaMinutes === null) {
-      return `${formatDuration(used)} hoje · sem cota`;
+      return i18n.t("usedUnlimited", [formatDuration(used)]);
     }
 
     if (used >= site.quotaMinutes * 60) {
-      return "esgotado hoje";
+      return i18n.t("exhaustedToday");
     }
 
-    return `${formatDuration(used)} de ${formatMinutes(site.quotaMinutes)} hoje`;
+    return i18n.t("usedOfToday", [formatDuration(used), formatMinutes(site.quotaMinutes)]);
   }
 
   function quotaRatio(site: SiteRule) {
@@ -277,23 +278,23 @@
 <main>
   <div class="top">
     <Logo />
-    <a class="link" href="/week.html">semana →</a>
+    <a class="link" href="/week.html">{i18n.t("week")} →</a>
   </div>
 
   {#if saveError}<p class="save-error" role="alert">{saveError}</p>{/if}
 
   <div class="title">
-    <h1 class="doto">Configurações</h1>
+    <h1 class="doto">{i18n.t("settings")}</h1>
     <div class="state">
-      <span>agora · {WEEKDAYS[today]} {formatClock(now.getTime(), now)}</span>
-      {blockedNow ? "horário bloqueado" : "fora do horário"}
+      <span>{i18n.t("nowAt", [formatWeekday(now), formatClock(now.getTime(), now)])}</span>
+      {blockedNow ? i18n.t("blockedHours") : i18n.t("outsideHours")}
     </div>
   </div>
 
   <section class="card">
-    <div class="label head"><span>Horários bloqueados</span><span>arraste para pintar</span></div>
+    <div class="label head"><span>{i18n.t("schedule")}</span><span>{i18n.t("dragPaint")}</span></div>
 
-    <div class="grid" role="grid" aria-label="Horários bloqueados por dia e meia hora" tabindex="-1" onkeydown={onGridKey}>
+    <div class="grid" role="grid" aria-label={i18n.t("scheduleAria")} tabindex="-1" onkeydown={onGridKey}>
       <i class="now-band" aria-hidden="true" style:left="calc(34px + (100% - 86px) * {nowSlot / SLOTS_PER_DAY})"></i>
       <span class="now-tag doto" aria-hidden="true" style:left="calc(34px + (100% - 86px) * {dayProgress})">{nowLabel}</span>
       {#each WEEKDAYS as name, day (name)}
@@ -321,52 +322,52 @@
     </div>
 
     <div class="foot">
-      <span>bloqueado <b>{formatSlots(weekSlots)}</b> por semana</span>
-      <span>próximo <b>{windowStart === null ? "nenhum" : formatClock(windowStart, now)}</b></span>
+      <span>{i18n.t("blockedWeekly", [formatSlots(weekSlots)])}</span>
+      <span>{i18n.t("next")} <b>{windowStart === null ? i18n.t("none") : formatClock(windowStart, now)}</b></span>
     </div>
   </section>
 
   <section class="card">
-    <div class="label head"><span>Sites</span><span>cota zera às 00:00</span></div>
+    <div class="label head"><span>{i18n.t("sites")}</span><span>{i18n.t("resetsMidnight")}</span></div>
 
     {#if config.sites.length}
       <ul class="sites">
         {#each config.sites as site (site.domain)}
           <li>
             <span class="domain">{site.domain}</span>
-            <div class="use" class:out={quotaHint(site) === "esgotado hoje" || site.quotaMinutes === 0}>
+            <div class="use" class:out={quotaRatio(site) >= 1}>
               <span>{quotaHint(site)}</span>
               <Dots ratio={quotaRatio(site)} />
             </div>
             <div class="stepper">
-              <button aria-label="Diminuir cota de {site.domain}" onclick={() => stepQuota(site, -1)}>−</button>
+              <button aria-label={i18n.t("decreaseQuota", [site.domain])} onclick={() => stepQuota(site, -1)}>−</button>
               <output class="doto">{site.quotaMinutes === null ? "∞" : formatMinutes(site.quotaMinutes)}</output>
-              <button aria-label="Aumentar cota de {site.domain}" onclick={() => stepQuota(site, 1)}>+</button>
+              <button aria-label={i18n.t("increaseQuota", [site.domain])} onclick={() => stepQuota(site, 1)}>+</button>
             </div>
             <label class="follow">
-              <span>horários</span>
+              <span>{i18n.t("followHours")}</span>
               <Switch
                 checked={site.followSchedule}
-                label="{site.domain} segue os horários"
+                label={i18n.t("followsSchedule", [site.domain])}
                 onchange={(value) => {
                   site.followSchedule = value;
                   commit();
                 }}
               />
             </label>
-            <button class="remove" class:confirm={confirming === site.domain} onblur={() => (confirming = null)} onclick={() => removeSite(site.domain)}>
-              {confirming === site.domain ? "remover?" : "×"}
+            <button class="remove" aria-label={i18n.t("removeSite", [site.domain])} class:confirm={confirming === site.domain} onblur={() => (confirming = null)} onclick={() => removeSite(site.domain)}>
+              {confirming === site.domain ? i18n.t("removeConfirm") : "×"}
             </button>
           </li>
         {/each}
       </ul>
     {:else}
-      <p class="empty">Nenhum site ainda. Adicione o primeiro abaixo.</p>
+      <p class="empty">{i18n.t("emptyOptions")}</p>
     {/if}
 
     <form class="add" onsubmit={addSite}>
       <span>+</span>
-      <input bind:value={draft} placeholder="adicionar site, ex: tiktok.com" aria-label="Adicionar site" oninput={() => (draftError = "")} />
+      <input bind:value={draft} placeholder={i18n.t("addPlaceholder")} aria-label={i18n.t("addSite")} oninput={() => (draftError = "")} />
       <kbd>enter</kbd>
     </form>
     {#if draftError}<p class="error" role="alert">{draftError}</p>{/if}
@@ -375,12 +376,12 @@
   <div class="pair">
     <section class="card option">
       <div>
-        <div class="label">Liberar 5 min</div>
-        <p>Espera de 30s com a página visível. Até 2× por dia. Nunca dentro do horário bloqueado.</p>
+        <div class="label">{i18n.t("unlock")}</div>
+        <p>{i18n.t("unlockHelp")}</p>
       </div>
       <Switch
         checked={config.escape}
-        label="Liberar 5 min"
+        label={i18n.t("unlock")}
         onchange={(value) => {
           config.escape = value;
           commit();
@@ -389,12 +390,12 @@
     </section>
     <section class="card option">
       <div>
-        <div class="label">Aviso</div>
-        <p>Notifica 1 min antes do horário começar ou da cota acabar.</p>
+        <div class="label">{i18n.t("warning")}</div>
+        <p>{i18n.t("warningHelp")}</p>
       </div>
       <Switch
         checked={config.warn}
-        label="Aviso antes de bloquear"
+        label={i18n.t("warningAria")}
         onchange={(value) => {
           config.warn = value;
           commit();
@@ -405,10 +406,10 @@
 
   <section class="card">
     <div class="label head">
-      <span>Diagnóstico</span>
-      <button class="copy" onclick={copyReport}>{copied ? "copiado" : "copiar relatório"}</button>
+      <span>{i18n.t("diagnostics")}</span>
+      <button class="copy" onclick={copyReport}>{copied ? i18n.t("copied") : i18n.t("copyReport")}</button>
     </div>
-    <p class="clock">{clock.timeZone} · {formatOffset(clock.offsetMinutes)} · dia {clock.day}</p>
+    <p class="clock">{clock.timeZone} · {formatOffset(clock.offsetMinutes)} · {i18n.t("diagnosticDay", [clock.day])}</p>
     {#if recent.length}
       <ol class="events">
         {#each recent as entry, index (`${entry.at}-${index}`)}
@@ -419,7 +420,7 @@
         {/each}
       </ol>
     {:else}
-      <p class="empty">Nenhum evento registrado ainda.</p>
+      <p class="empty">{i18n.t("emptyJournal")}</p>
     {/if}
   </section>
 </main>

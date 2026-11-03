@@ -1,3 +1,4 @@
+import { i18n } from "#i18n";
 import * as v from "valibot";
 import { browser } from "wxt/browser";
 
@@ -119,22 +120,22 @@ export function observe(journal: Journal, snapshot: Snapshot, now: Date) {
   return append({ ...journal, ...state }, entries);
 }
 
-const reasonLabels = { always: "cota 0", window: "horário", quota: "cota esgotada" };
+const reasonLabels = { always: i18n.t("zeroQuota"), window: i18n.t("hoursReason"), quota: i18n.t("quotaReached") };
 
 export function describeEntry(entry: JournalEntry, now: Date) {
   switch (entry.kind) {
     case "day":
-      return entry.from === null ? `dia ${entry.to} · início do registro` : `virada ${entry.from} → ${entry.to} · cota e liberações zeradas`;
+      return entry.from === null ? i18n.t("journalStart", [entry.to]) : i18n.t("journalDay", [entry.from, entry.to]);
     case "blocked": {
-      const until = entry.until === null ? "sem fim" : `até ${formatClock(entry.until, now)}`;
-      return `${entry.domain} bloqueado · ${reasonLabels[entry.reason]} · ${until}`;
+      const until = entry.until === null ? i18n.t("noEnd") : i18n.t("until", [formatClock(entry.until, now)]);
+      return i18n.t("journalBlocked", [entry.domain, reasonLabels[entry.reason], until]);
     }
     case "free":
-      return `${entry.domain} liberado`;
+      return i18n.t("journalFree", [entry.domain]);
     case "escape":
-      return `${entry.domain} liberado 5 min · até ${formatClock(entry.until, now)}`;
+      return i18n.t("journalEscape", [entry.domain, formatClock(entry.until, now)]);
     case "invalid":
-      return `storage.${entry.key} inválido · valor padrão aplicado · ${entry.summary}`;
+      return i18n.t("journalInvalid", [entry.key, entry.summary]);
     default: {
       const exhaustive: never = entry;
       return exhaustive;

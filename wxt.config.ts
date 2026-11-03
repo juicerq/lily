@@ -5,10 +5,11 @@ const forAmo = process.env.LILY_AMO === "1";
 
 export default defineConfig({
   srcDir: "src",
-  modules: ["@wxt-dev/module-svelte"],
+  modules: ["@wxt-dev/module-svelte", "@wxt-dev/i18n/module"],
   manifest: {
+    default_locale: "en",
     name: "Lily",
-    description: "Horários e cotas diárias para os sites que roubam seu tempo.",
+    description: "__MSG_extensionDescription__",
     permissions: ["storage", "tabs", "webNavigation", "alarms", "idle", "notifications"],
     icons: { 48: "icon-48.png", 96: "icon-96.png", 128: "icon-128.png" },
     action: {

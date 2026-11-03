@@ -1,4 +1,10 @@
-import { WEEKDAYS, addDays, dayKey, nextMidnight, weekday } from "@/lib/time";
+import { i18n } from "#i18n";
+
+import { addDays, dayKey, nextMidnight } from "@/lib/time";
+
+const locale = i18n.t("locale");
+
+export const WEEKDAYS = Array.from({ length: 7 }, (_, day) => formatWeekday(new Date(2024, 0, 1 + day)));
 
 export function formatDuration(totalSeconds: number) {
   const seconds = Math.max(0, Math.floor(totalSeconds));
@@ -37,21 +43,17 @@ export function formatClock(timestamp: number, now: Date) {
     return clock;
   }
 
-  return `${WEEKDAYS[weekday(date)]} ${clock}`;
+  return `${formatWeekday(date)} ${clock}`;
 }
 
-const MONTHS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
-
 export function formatDay(date: Date) {
-  return `${date.getDate()} ${MONTHS[date.getMonth()]}`;
+  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }).format(date);
 }
 
 export function formatWeek(monday: Date) {
-  const sunday = addDays(monday, 6);
+  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }).formatRange(monday, addDays(monday, 6));
+}
 
-  if (monday.getMonth() === sunday.getMonth()) {
-    return `${monday.getDate()} – ${formatDay(sunday)}`;
-  }
-
-  return `${formatDay(monday)} – ${formatDay(sunday)}`;
+export function formatWeekday(date: Date) {
+  return new Intl.DateTimeFormat(locale, { weekday: "short" }).format(date).replace(/\.$/, "");
 }

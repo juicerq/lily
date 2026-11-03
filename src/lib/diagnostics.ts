@@ -1,7 +1,8 @@
+import { WEEKDAYS } from "@/lib/format";
 import type { Journal } from "@/lib/journal";
 import { inWindow, nextChange, nextWindowStart, statusOf } from "@/lib/rules";
 import type { Snapshot } from "@/lib/snapshot";
-import { WEEKDAYS, dayKey, localIso, slotOf, weekday } from "@/lib/time";
+import { dayKey, localIso, slotOf, weekday } from "@/lib/time";
 import { usedSeconds } from "@/lib/usage";
 
 export interface AlarmInfo {

@@ -1,3 +1,4 @@
+import { i18n } from "#i18n";
 import * as v from "valibot";
 import { browser, type Browser } from "wxt/browser";
 
@@ -230,13 +231,13 @@ async function notifyBeforeBlock(alarm: string) {
 
   const message =
     alarm === "edge-warn"
-      ? "O horário bloqueado começa em 1 minuto."
-      : `A cota de hoje acaba em ${formatDuration(status.remaining ?? 0)}.`;
+      ? i18n.t("warningSchedule")
+      : i18n.t("warningQuota", [formatDuration(status.remaining ?? 0)]);
 
   await browser.notifications.create("lily-warn", {
     type: "basic",
     iconUrl: browser.runtime.getURL("/icon-96.png"),
-    title: `${site.domain} bloqueia em 1 min`,
+    title: i18n.t("warningTitle", [site.domain]),
     message,
   });
 }

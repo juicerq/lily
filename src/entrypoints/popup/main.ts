@@ -1,3 +1,4 @@
+import { localizePage } from "@/lib/i18n";
 import { mount } from "svelte";
 import { browser } from "wxt/browser";
 
@@ -19,6 +20,8 @@ function visibleUrl(url: string | undefined) {
 }
 
 async function start() {
+  localizePage("Lily");
+
   const target = document.getElementById("app");
 
   if (!target) {

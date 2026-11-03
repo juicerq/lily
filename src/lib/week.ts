@@ -187,7 +187,7 @@ export function quotaPeak(week: WeekSummary) {
 
   const slot = Math.round(sum(site.outSlots) / site.outSlots.length);
 
-  return { domain: site.domain, quota: site.quota, days: site.outSlots.length, slot };
+  return { domain: site.domain, days: site.outSlots.length, slot };
 }
 
 export function outside(days: (DayRecord | null)[], config: Config, limit: number) {

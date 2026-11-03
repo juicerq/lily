@@ -1,3 +1,5 @@
+import { localizePage } from "@/lib/i18n";
+import { i18n } from "#i18n";
 import { mount } from "svelte";
 
 import "@/assets/theme.css";
@@ -7,6 +9,8 @@ import { loadSnapshot } from "@/lib/snapshot";
 import App from "./App.svelte";
 
 async function start() {
+  localizePage(`Lily · ${i18n.t("settings")}`);
+
   const target = document.getElementById("app");
 
   if (!target) {
