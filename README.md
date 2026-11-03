@@ -34,7 +34,7 @@ O popup mostra o tempo restante da aba atual e o estado dos outros sites.
 
 ### Quando é hora de parar
 
-A tela de bloqueio explica o motivo e mostra quando o site estará disponível de novo. Se alguém mandou um post do X ou do Instagram, "Ver só este post" mostra só aquele post, sem feed e sem liberar o site.
+A tela de bloqueio explica o motivo e mostra quando o site estará disponível de novo. Se alguém mandou um post do X ou do Instagram, "Ver só este post" mostra só aquele post, sem feed e sem liberar o site. Um perfil do Instagram abre do mesmo jeito, com "Ver só este perfil".
 
 ![Tela de bloqueio do YouTube até as 18h, com opção de fechar a aba](docs/images/blocked.png)
 
