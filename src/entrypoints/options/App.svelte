@@ -8,7 +8,7 @@
   import Switch from "@/components/Switch.svelte";
   import { saveConfig, type SiteRule } from "@/lib/config";
   import { clockInfo, diagnose } from "@/lib/diagnostics";
-  import { WEEKDAYS, formatClock, formatDuration, formatMinutes } from "@/lib/format";
+  import { WEEKDAYS, formatClock, formatDuration, formatMinutes, formatWeekday } from "@/lib/format";
   import { describeEntry, loadJournal, type Journal } from "@/lib/journal";
   import { inWindow, nextWindowStart, normalizeDomain } from "@/lib/rules";
   import { loadSnapshot, type Snapshot } from "@/lib/snapshot";
@@ -286,7 +286,7 @@
   <div class="title">
     <h1 class="doto">{i18n.t("settings")}</h1>
     <div class="state">
-      <span>{i18n.t("nowAt", [WEEKDAYS[today] ?? "", formatClock(now.getTime(), now)])}</span>
+      <span>{i18n.t("nowAt", [formatWeekday(now), formatClock(now.getTime(), now)])}</span>
       {blockedNow ? i18n.t("blockedHours") : i18n.t("outsideHours")}
     </div>
   </div>
