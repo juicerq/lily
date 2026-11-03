@@ -36,7 +36,7 @@ const EMBEDS = [
   },
   {
     domains: ["instagram.com"],
-    kind: "perfil",
+    kind: "profile",
     path: /^\/([\w.]+)\/?$/,
     src: (user: string) => `https://www.instagram.com/${user}/embed/`,
     height: InstagramHeight,

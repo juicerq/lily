@@ -2,13 +2,17 @@
 
 # Lily
 
+Português · [English](README.en.md) · [Español](README.es.md)
+
 Horários e cotas diárias para os sites que roubam seu tempo.
 
-Extensão para Firefox e Zen, com interface em português, visual monocromático e dados guardados no próprio navegador. Feita com Svelte 5, TypeScript e WXT.
+Extensão para Firefox e Zen, com interface em português do Brasil, inglês e espanhol, visual monocromático e dados guardados no próprio navegador. Feita com Svelte 5, TypeScript e WXT.
 
 [Baixar a última versão](https://github.com/juicerq/lily/releases/latest) · [Regras e arquitetura](docs/spec.md) · [Licença MIT](LICENSE)
 
 ![Configurações da Lily com grade semanal de horários bloqueados e cotas por site](docs/images/options.png)
+
+O idioma acompanha o navegador, com inglês para idiomas não suportados. Datas usam o idioma da interface; horários continuam em 24 horas, no fuso local, e a semana começa na segunda-feira.
 
 ## Como funciona
 

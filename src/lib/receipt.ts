@@ -1,5 +1,6 @@
-import { formatDuration, formatMinutes } from "@/lib/format";
-import { SLOTS_PER_DAY, WEEKDAYS } from "@/lib/time";
+import { i18n } from "#i18n";
+import { WEEKDAYS, formatDuration, formatMinutes } from "@/lib/format";
+import { SLOTS_PER_DAY } from "@/lib/time";
 import { slotSeconds, slotTries, type SiteWeek, type WeekSummary } from "@/lib/week";
 
 export const RECEIPT_SIZE = { width: 1080, height: 1350 };
@@ -145,13 +146,13 @@ function quotaLine(site: SiteWeek) {
   const tries = site.tries.reduce((total, count) => total + count, 0);
 
   if (site.quota === 0) {
-    return `cota 0 · ${tries} tentativas`;
+    return i18n.t("receiptZeroQuota", [i18n.t("attempts", tries)]);
   }
 
-  const quota = site.quota === null ? "sem cota" : `cota ${formatMinutes(site.quota)}`;
+  const quota = site.quota === null ? i18n.t("unlimited") : i18n.t("receiptQuota", [formatMinutes(site.quota)]);
   const exhausted = site.exhausted.filter(Boolean).length;
 
-  return `${quota} · esgotou ${exhausted}× · ${tries} tent.`;
+  return i18n.t("receiptQuotaLine", [quota, exhausted, tries]);
 }
 
 export async function drawReceipt(canvas: HTMLCanvasElement, input: ReceiptInput) {
@@ -173,23 +174,23 @@ export async function drawReceipt(canvas: HTMLCanvasElement, input: ReceiptInput
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   text("lily", LEFT, 150, { font: doto(68), color: FG });
-  text("EXTRATO SEMANAL", RIGHT, 112, { font: mono(20), color: MUTE, align: "right", spacing: "4px" });
+  text(i18n.t("receiptHeading"), RIGHT, 112, { font: mono(20), color: MUTE, align: "right", spacing: "4px" });
   text(input.label, RIGHT, 156, { font: mono(32), color: FG, align: "right" });
   rule(206);
 
   text(formatDuration(week.total), LEFT, 350, { font: doto(112), color: FG });
-  text("NOS SITES DA LISTA", LEFT, 398, { font: mono(19), color: MUTE, spacing: "3px" });
+  text(i18n.t("receiptListed"), LEFT, 398, { font: mono(19), color: MUTE, spacing: "3px" });
 
   if (input.previousTotal !== null) {
     const diff = week.total - input.previousTotal;
 
-    text(`${diff < 0 ? "−" : "+"}${formatDuration(Math.abs(diff))} vs. semana anterior`, LEFT, 438, { font: mono(22), color: SOFT });
+    text(i18n.t("receiptVersus", [`${diff < 0 ? "−" : "+"}${formatDuration(Math.abs(diff))}`]), LEFT, 438, { font: mono(22), color: SOFT });
   }
 
   text(String(week.tries), 660, 296, { font: doto(68), color: FG });
-  text("TENTATIVAS BLOQUEADAS", 660, 332, { font: mono(17), color: MUTE, spacing: "3px" });
+  text(i18n.t("receiptAttempts"), 660, 332, { font: mono(17), color: MUTE, spacing: "3px" });
   text(`${week.escapes}/${input.escapeLimit}`, 660, 410, { font: doto(68), color: FG });
-  text("LIBERAÇÕES DE 5 MIN", 660, 446, { font: mono(17), color: MUTE, spacing: "3px" });
+  text(i18n.t("receiptUnlocks"), 660, 446, { font: mono(17), color: MUTE, spacing: "3px" });
   rule(488);
 
   drawMap(ctx, week, 562);
@@ -214,8 +215,8 @@ export async function drawReceipt(canvas: HTMLCanvasElement, input: ReceiptInput
   rule(1236);
 
   const hidden = week.sites.length - shown.length;
-  const legend = `barra branca = cota esgotada${hidden > 0 ? ` · +${hidden} sites` : ""}`;
+  const legend = i18n.t("receiptLegend") + (hidden > 0 ? i18n.t("receiptHidden", [hidden]) : "");
 
   text(legend, LEFT, 1282, { font: mono(16), color: MUTE });
-  text(`emitido ${input.issued} · lily`, RIGHT, 1282, { font: mono(16), color: MUTE, align: "right" });
+  text(i18n.t("receiptIssued", [input.issued]), RIGHT, 1282, { font: mono(16), color: MUTE, align: "right" });
 }

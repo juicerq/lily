@@ -1,14 +1,15 @@
 <script lang="ts">
+  import { i18n } from "#i18n";
   import { untrack } from "svelte";
   import { browser } from "wxt/browser";
 
   import Logo from "@/components/Logo.svelte";
   import { saveConfig } from "@/lib/config";
-  import { formatDay, formatDuration, formatMinutes, formatWeek } from "@/lib/format";
+  import { WEEKDAYS, formatDay, formatDuration, formatMinutes, formatWeek } from "@/lib/format";
   import { HISTORY_DAYS, loadDays, type DayRecord } from "@/lib/history";
   import { RECEIPT_SIZE, drawReceipt } from "@/lib/receipt";
   import { loadSnapshot, type Snapshot } from "@/lib/snapshot";
-  import { SLOTS_PER_DAY, WEEKDAYS, addDays, dayKey, mondayOf, slotLabel, weekday } from "@/lib/time";
+  import { SLOTS_PER_DAY, addDays, dayKey, mondayOf, slotLabel, weekday } from "@/lib/time";
   import { MAX_ESCAPES } from "@/lib/usage";
   import {
     outside,
@@ -26,7 +27,7 @@
 
   const HOURS = ["00", "03", "06", "09", "12", "15", "18", "21"];
   const OLDEST = -Math.floor(HISTORY_DAYS / 7) + 1;
-  const reasons = { always: "cota 0", window: "horário", quota: "cota esgotada" };
+  const reasons = { always: i18n.t("zeroQuota"), window: i18n.t("hoursReason"), quota: i18n.t("quotaReached") };
 
   let snapshot = $state(untrack(() => initial));
   let offset = $state(0);
@@ -36,7 +37,7 @@
   let hovered = $state<{ day: number; slot: number } | null>(null);
   let preview = $state(false);
   let receipt = $state<{ url: string; blob: Blob; name: string } | null>(null);
-  let copyState = $state("copiar imagem");
+  let copyState = $state(i18n.t("copyImage"));
   let loading = 0;
   let rendering = 0;
 
@@ -82,7 +83,7 @@
       return;
     }
 
-    void render({ week, label: current ? `${label} · parcial` : label, previousTotal: previousRecorded ? previous.total : null, name: `lily-extrato-${dayKey(monday)}.png` });
+    void render({ week, label: current ? i18n.t("partialWeek", [label]) : label, previousTotal: previousRecorded ? previous.total : null, name: `lily-${dayKey(monday)}.png` });
   });
 
   async function load(from: Date) {
@@ -133,16 +134,16 @@
     }
 
     const result = await navigator.clipboard.write([new ClipboardItem({ "image/png": receipt.blob })]).then(
-      () => "copiada",
+      () => i18n.t("imageCopied"),
       (error: unknown) => {
         console.error("lily:", error);
-        return "não deu para copiar";
+        return i18n.t("copyImageError");
       },
     );
 
     copyState = result;
     setTimeout(() => {
-      copyState = "copiar imagem";
+      copyState = i18n.t("copyImage");
     }, 2000);
   }
 
@@ -183,12 +184,12 @@
 
   function quotaText(site: SiteWeek) {
     if (site.quota === 0) {
-      return "cota 0 · sempre bloqueado";
+      return i18n.t("alwaysQuota");
     }
 
-    const quotaLabel = site.quota === null ? "sem cota" : `cota ${formatMinutes(site.quota)}/dia`;
+    const quotaLabel = site.quota === null ? i18n.t("unlimited") : i18n.t("quotaPerDay", [formatMinutes(site.quota)]);
 
-    return site.followSchedule ? quotaLabel : `${quotaLabel} · sem horários`;
+    return site.followSchedule ? quotaLabel : i18n.t("noSchedule", [quotaLabel]);
   }
 
   function versus(site: SiteWeek) {
@@ -200,10 +201,10 @@
     const diff = site.total - before;
 
     if (Math.abs(diff) < 60) {
-      return "igual à anterior";
+      return i18n.t("samePrevious");
     }
 
-    return `${diff < 0 ? "−" : "+"}${formatDuration(Math.abs(diff))} vs. anterior`;
+    return i18n.t("versus", [`${diff < 0 ? "−" : "+"}${formatDuration(Math.abs(diff))}`]);
   }
 
   function toggleFilter(domain: string) {
@@ -229,31 +230,31 @@
 <main>
   <div class="top">
     <Logo />
-    <a class="link" href="/options.html">configurações</a>
+    <a class="link" href="/options.html">{i18n.t("settings")}</a>
   </div>
 
   <div class="title">
-    <h1 class="doto">Semana</h1>
+    <h1 class="doto">{i18n.t("week")}</h1>
     <div class="nav">
-      <button aria-label="Semana anterior" disabled={offset <= OLDEST} onclick={() => (offset -= 1)}>‹</button>
-      <span>{label}{current ? " · parcial" : ""}</span>
-      <button aria-label="Próxima semana" disabled={current} onclick={() => (offset += 1)}>›</button>
+      <button aria-label={i18n.t("previousWeek")} disabled={offset <= OLDEST} onclick={() => (offset -= 1)}>‹</button>
+      <span>{current ? i18n.t("partialWeek", [label]) : label}</span>
+      <button aria-label={i18n.t("nextWeek")} disabled={current} onclick={() => (offset += 1)}>›</button>
     </div>
   </div>
 
   {#if !recorded}
     <section class="card">
-      <p class="empty">Nada registrado nesta semana. A Lily guarda o histórico das últimas 12 semanas a partir da versão 0.2.</p>
+      <p class="empty">{i18n.t("emptyWeek")}</p>
     </section>
   {:else}
     <div class="hero">
-      <div><span class="num doto">{week.tries}</span><span class="label">tentativas bloqueadas</span></div>
-      <div><span class="num doto">{week.escapes}/{MAX_ESCAPES * 7}</span><span class="label">liberações de 5 min</span></div>
+      <div><span class="num doto">{week.tries}</span><span class="label">{i18n.t("blockedAttempts")}</span></div>
+      <div><span class="num doto">{week.escapes}/{MAX_ESCAPES * 7}</span><span class="label">{i18n.t("fiveMinuteUnlocks")}</span></div>
     </div>
 
     <section class="card">
-      <div class="label head"><span>Uso por site</span><span>{filter ? `mapa · ${filter}` : "clique para filtrar o mapa"}</span></div>
-      <p class="note">Tempo com a aba ativa, janela em foco e você presente. Vídeo tocando conta mesmo sem mexer no mouse.</p>
+      <div class="label head"><span>{i18n.t("usageBySite")}</span><span>{filter ? i18n.t("filteredMap", [filter]) : i18n.t("filterHint")}</span></div>
+      <p class="note">{i18n.t("usageHelp")}</p>
 
       <ul class="sites">
         {#each week.sites as site (site.domain)}
@@ -262,7 +263,7 @@
             <button class="site" class:on={filter === site.domain} onclick={() => toggleFilter(site.domain)}>
               <span class="domain">{site.domain}<small>{quotaText(site)}</small></span>
               {#if site.quota === 0}
-                <span class="total off">bloqueado</span>
+                <span class="total off">{i18n.t("blocked")}</span>
               {:else}
                 <span class="total doto">{formatDuration(site.total)}</span>
               {/if}
@@ -287,9 +288,9 @@
               </span>
               <span class="meta">
                 {#if site.quota === 0}
-                  <b>{sum(site.tries)}</b> tentativas
+                  {i18n.t("attempts", sum(site.tries))}
                 {:else}
-                  média <b>{formatDuration(site.total / elapsed)}</b>/dia
+                  {i18n.t("dailyAverage", [formatDuration(site.total / elapsed)])}
                   {#if versus(site)}<br />{versus(site)}{/if}
                 {/if}
               </span>
@@ -299,20 +300,20 @@
       </ul>
 
       <div class="sum">
-        <span class="label">total</span>
+        <span class="label">{i18n.t("total")}</span>
         <span class="total doto">{formatDuration(week.total)}</span>
         <span class="letters" aria-hidden="true">{#each WEEKDAYS as name (name)}<span>{name.charAt(0)}</span>{/each}</span>
         <span class="meta">
-          média <b>{formatDuration(week.total / elapsed)}</b>/dia
-          {#if previousRecorded}<br />{week.total < previous.total ? "−" : "+"}{formatDuration(Math.abs(week.total - previous.total))} vs. anterior{/if}
+          {i18n.t("dailyAverage", [formatDuration(week.total / elapsed)])}
+          {#if previousRecorded}<br />{i18n.t("versus", [`${week.total < previous.total ? "−" : "+"}${formatDuration(Math.abs(week.total - previous.total))}`])}{/if}
         </span>
       </div>
     </section>
 
     <section class="card">
-      <div class="label head"><span>Mapa</span><span>{filter ?? "todos os sites"}</span></div>
+      <div class="label head"><span>{i18n.t("map")}</span><span>{filter ?? i18n.t("allSites")}</span></div>
 
-      <div class="map" role="img" aria-label="Uso e tentativas por meia hora em cada dia da semana">
+      <div class="map" role="img" aria-label={i18n.t("mapAria")}>
         <span></span>
         <div class="hours">{#each HOURS as hour (hour)}<span>{hour}</span>{/each}</div>
         {#each WEEKDAYS as name, day (name)}
@@ -344,38 +345,38 @@
         {#if hoverInfo}
           <b>{hoverInfo.title}</b>
           {#each hoverInfo.sites as site (site.domain)}<span>{site.domain} · {formatDuration(site.seconds)}</span>{/each}
-          {#if hoverInfo.blocked.length}<span>{hoverInfo.blocked.length} tentativa{hoverInfo.blocked.length > 1 ? "s" : ""} · {[...new Set(hoverInfo.blocked.map((entry) => `${entry.domain} ${reasons[entry.reason]}`))].join(", ")}</span>{/if}
-          {#if !hoverInfo.sites.length && !hoverInfo.blocked.length}<span>sem uso</span>{/if}
+          {#if hoverInfo.blocked.length}<span>{i18n.t("attempts", hoverInfo.blocked.length)} · {[...new Set(hoverInfo.blocked.map((entry) => `${entry.domain} ${reasons[entry.reason]}`))].join(", ")}</span>{/if}
+          {#if !hoverInfo.sites.length && !hoverInfo.blocked.length}<span>{i18n.t("noUsage")}</span>{/if}
         {:else}
-          <span><i class="dot legend"></i>uso, maior = mais tempo</span>
-          <span><i class="try legend"></i>tentativa bloqueada</span>
-          <span><i class="paint legend"></i>horário pintado</span>
+          <span><i class="dot legend"></i>{i18n.t("usageLegend")}</span>
+          <span><i class="try legend"></i>{i18n.t("attemptLegend")}</span>
+          <span><i class="paint legend"></i>{i18n.t("paintLegend")}</span>
         {/if}
       </p>
     </section>
 
     {#if peak || tries || quota}
       <section class="card">
-        <div class="label head"><span>Leitura da semana</span></div>
+        <div class="label head"><span>{i18n.t("insights")}</span></div>
         <ul class="insights">
           {#if peak}
             <li>
-              <p>Seu maior uso fora dos horários é <b>{slotLabel(peak.from)}–{slotLabel(peak.to)}</b>, seg–sex: <b>{formatDuration(peak.seconds)}</b> na semana. Esse trecho não está pintado.</p>
+              <p>{i18n.t("peakInsight", [slotLabel(peak.from), slotLabel(peak.to), formatDuration(peak.seconds)])}</p>
               <button class="act" onpointerenter={() => (preview = true)} onpointerleave={() => (preview = false)} onclick={paintPeak}>
-                pintar {slotLabel(peak.from)}–{slotLabel(peak.to)} seg–sex
+                {i18n.t("paintPeak", [slotLabel(peak.from), slotLabel(peak.to)])}
               </button>
             </li>
           {/if}
           {#if tries}
             <li>
-              <p><b>{tries.domain}</b> foi bloqueado <b>{tries.count}×</b>. {tries.atHour} dessas tentativas foram entre <b>{tries.hour}h e {tries.hour + 1}h</b>.</p>
-              <button class="act" onclick={() => toggleFilter(tries.domain)}>{filter === tries.domain ? "ver todos" : `ver só ${tries.domain}`}</button>
+              <p>{i18n.t("triesInsight", [tries.domain, tries.count, tries.atHour, slotLabel(tries.hour * 2), slotLabel((tries.hour + 1) * 2)])}</p>
+              <button class="act" onclick={() => toggleFilter(tries.domain)}>{filter === tries.domain ? i18n.t("viewAll") : i18n.t("viewOnly", [tries.domain])}</button>
             </li>
           {/if}
           {#if quota}
             <li>
-              <p>A cota{quota.quota ? ` de ${formatMinutes(quota.quota)}` : ""} do <b>{quota.domain}</b> acabou em <b>{quota.days} de {elapsed} dias</b>, em média por volta das <b>{slotLabel(quota.slot)}</b>.</p>
-              <button class="act" onclick={() => toggleFilter(quota.domain)}>{filter === quota.domain ? "ver todos" : `ver só ${quota.domain}`}</button>
+              <p>{i18n.t("quotaInsight", [quota.domain, quota.days, elapsed, slotLabel(quota.slot)])}</p>
+              <button class="act" onclick={() => toggleFilter(quota.domain)}>{filter === quota.domain ? i18n.t("viewAll") : i18n.t("viewOnly", [quota.domain])}</button>
             </li>
           {/if}
         </ul>
@@ -384,13 +385,13 @@
 
     {#if others.length}
       <section class="card">
-        <div class="label head"><span>Fora da lista</span><span>mais tempo na semana</span></div>
+        <div class="label head"><span>{i18n.t("outsideList")}</span><span>{i18n.t("mostTime")}</span></div>
         <ul class="others">
           {#each others as other (other.domain)}
             <li>
               <span>{other.domain}</span>
               <b>{formatDuration(other.seconds)}</b>
-              <button class="add" onclick={() => addSite(other.domain)}>+ lista</button>
+              <button class="add" onclick={() => addSite(other.domain)}>{i18n.t("addToList")}</button>
             </li>
           {/each}
         </ul>
@@ -398,17 +399,17 @@
     {/if}
 
     <section class="card">
-      <div class="label head"><span>Extrato</span><span>{RECEIPT_SIZE.width} × {RECEIPT_SIZE.height}</span></div>
+      <div class="label head"><span>{i18n.t("receipt")}</span><span>{RECEIPT_SIZE.width} × {RECEIPT_SIZE.height}</span></div>
       <div class="receipt">
         {#if receipt}
-          <img src={receipt.url} alt="Extrato da semana {label}" width="270" height="338" />
+          <img src={receipt.url} alt={i18n.t("receiptAlt", [label])} width="270" height="338" />
         {:else}
           <div class="placeholder"></div>
         {/if}
         <div>
-          <p class="text">Uma imagem da semana, pronta para guardar ou mandar. Mostra <b>só os sites da lista</b>. Os sites de fora ficam nesta página.</p>
+          <p class="text">{i18n.t("receiptHelp")}</p>
           <div class="buttons">
-            <a class="act" class:disabled={!receipt} href={receipt?.url} download={receipt?.name}>baixar png</a>
+            <a class="act" class:disabled={!receipt} href={receipt?.url} download={receipt?.name}>{i18n.t("downloadPng")}</a>
             <button class="act ghost" disabled={!receipt} onclick={copyReceipt}>{copyState}</button>
           </div>
           {#if receipt}<p class="file">{receipt.name} · {Math.round(receipt.blob.size / 1024)} KB</p>{/if}
@@ -650,10 +651,6 @@
     text-align: right;
   }
 
-  .meta b {
-    color: var(--fg);
-    font-weight: 400;
-  }
 
   .map {
     display: grid;
@@ -777,11 +774,6 @@
     line-height: 1.65;
   }
 
-  .insights b,
-  .text b {
-    color: var(--fg);
-    font-weight: 400;
-  }
 
   .act {
     display: inline-block;
