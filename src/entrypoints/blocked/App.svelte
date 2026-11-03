@@ -4,6 +4,7 @@
   import { browser } from "wxt/browser";
 
   import Logo from "@/components/Logo.svelte";
+  import { embedOf } from "@/lib/embed";
   import { formatClock, formatDuration, formatMinutes } from "@/lib/format";
   import { EscapeResult, type EscapeRequest } from "@/lib/messages";
   import { canEscape, hostOf, matchSite, statusOf } from "@/lib/rules";
@@ -18,6 +19,9 @@
   let now = $state(new Date());
   let waiting: number | null = $state(null);
   let denied = $state(false);
+  let showingPost = $state(false);
+  let postFrame: HTMLIFrameElement | undefined = $state();
+  let postHeight = $state(320);
 
   const host = $derived(url ? hostOf(url) : null);
   const site = $derived(host ? matchSite(snapshot.config.sites, host) : undefined);
@@ -25,6 +29,7 @@
   const used = $derived(site ? usedSeconds({ usage: snapshot.usage, session: snapshot.session, domain: site.domain, now }) : 0);
   const escapable = $derived(status ? canEscape(snapshot, status) : false);
   const escapesLeft = $derived(MAX_ESCAPES - snapshot.usage.escapes);
+  const post = $derived(url ? embedOf(url) : null);
 
   $effect(() => {
     const timer = setInterval(() => {
@@ -46,6 +51,30 @@
     browser.storage.onChanged.addListener(reload);
 
     return () => browser.storage.onChanged.removeListener(reload);
+  });
+
+  $effect(() => {
+    if (!post) {
+      return;
+    }
+
+    const { height } = post;
+
+    const measure = (event: MessageEvent) => {
+      if (!postFrame || event.source !== postFrame.contentWindow) {
+        return;
+      }
+
+      const parsed = v.safeParse(height, event.data);
+
+      if (parsed.success) {
+        postHeight = parsed.output;
+      }
+    };
+
+    window.addEventListener("message", measure);
+
+    return () => window.removeEventListener("message", measure);
   });
 
   $effect(() => {
@@ -140,19 +169,31 @@
   </div>
 
   {#if status?.kind === "blocked"}
-    <div class="center">
-      <div class="label">{heading()}</div>
-      <div class="clock doto">{status.until === null ? "sempre" : formatClock(status.until, now)}</div>
-      {#if status.until !== null}
-        <div class="remain">libera em {formatDuration((status.until - now.getTime()) / 1000)}</div>
-      {/if}
-    </div>
+    {#if showingPost && post}
+      <div class="post">
+        <iframe bind:this={postFrame} src={post.src} title="Post" style:height="{postHeight}px"></iframe>
+      </div>
+    {:else}
+      <div class="center">
+        <div class="label">{heading()}</div>
+        <div class="clock doto">{status.until === null ? "sempre" : formatClock(status.until, now)}</div>
+        {#if status.until !== null}
+          <div class="remain">libera em {formatDuration((status.until - now.getTime()) / 1000)}</div>
+        {/if}
+      </div>
+    {/if}
 
     <div class="bottom">
       <p class="why">{reasonText()}</p>
 
       <div class="actions">
         <button class="primary" onclick={closeTab}>Fechar aba</button>
+
+        {#if post}
+          <button class="secondary" onclick={() => (showingPost = !showingPost)}>
+            {showingPost ? "Ocultar post" : "Ver só este post"}
+          </button>
+        {/if}
 
         {#if waiting !== null}
           <button class="secondary waiting" onclick={() => (waiting = null)}>
@@ -210,6 +251,22 @@
     justify-content: center;
     gap: 14px;
     padding: 48px 0;
+  }
+
+  .post {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 32px 0;
+  }
+
+  .post iframe {
+    width: 100%;
+    max-width: 550px;
+    border: 0;
+    border-radius: 12px;
+    color-scheme: light;
   }
 
   .clock {
